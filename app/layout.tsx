@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
+import { SiteGoogleAnalytics } from "@/components/site/google-analytics";
 import { buildRootMetadata, buildSiteJsonLd } from "@/lib/site/seo";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
         />
         {children}
+        <SiteGoogleAnalytics />
       </body>
     </html>
   );

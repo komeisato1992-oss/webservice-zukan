@@ -19,6 +19,7 @@
     "scrape:test:new6": "npx tsx scripts/test-new6-scrape.ts"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.11",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "exceljs": "^4.4.0",
