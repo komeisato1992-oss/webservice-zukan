@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: data?.seo_title || data?.name || "カテゴリ",
     description: data?.seo_description || undefined,
+    alternates: { canonical: `/${categorySlug}` },
   };
 }
 

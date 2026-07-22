@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
-import { buildRootMetadata } from "@/lib/site/seo";
+import { buildRootMetadata, buildSiteJsonLd } from "@/lib/site/seo";
 import "./globals.css";
 
 const notoSans = Noto_Sans_JP({
@@ -16,9 +16,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteJsonLd = buildSiteJsonLd();
+
   return (
     <html lang="ja" className={`${notoSans.variable} h-full`}>
       <body className="min-h-full bg-white font-sans text-slate-900 antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
         {children}
       </body>
     </html>

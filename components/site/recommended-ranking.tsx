@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { TOP_RANKING_TABS } from "@/lib/site/content";
 import type { ManagedRankingCard, ManagedRankingSet } from "@/lib/site/rankings-public";
 import type { EnrichedService } from "@/lib/site/service-utils";
@@ -163,7 +162,6 @@ export function RecommendedRanking({
   managedRankings,
   services,
 }: Props) {
-  const router = useRouter();
   const [activeId, setActiveId] = useState<string>(
     TOP_RANKING_TABS[0].purposeId,
   );
@@ -176,7 +174,18 @@ export function RecommendedRanking({
     .sort((a, b) => a.rank - b.rank)
     .slice(0, 3);
 
-  function handleCompareThese() {
+  const compareHrefSlugs = items
+    .map((card) => {
+      const found = services.find((s) => s.service.id === card.service.id);
+      return found?.service.slug;
+    })
+    .filter((slug): slug is string => Boolean(slug));
+  const compareHref =
+    compareHrefSlugs.length > 0
+      ? `${categoryPath(categorySlug, "compare")}?slugs=${compareHrefSlugs.join(",")}`
+      : categoryPath(categorySlug, "compare");
+
+  function prepareCompareSelection() {
     if (items.length === 0) return;
 
     const compareItems: Array<{
@@ -203,8 +212,6 @@ export function RecommendedRanking({
 
     // 比較ページの選択をランキング3件で上書き（TOP比較表は触らない）
     replace(compareItems);
-    const slugs = compareItems.map((i) => i.slug).join(",");
-    router.push(`${categoryPath(categorySlug, "compare")}?slugs=${slugs}`);
   }
 
   return (
@@ -279,16 +286,16 @@ export function RecommendedRanking({
               ← 左右にスワイプして比較 →
             </p>
             <div className="mt-4 flex justify-center sm:mt-5">
-              <button
-                type="button"
-                onClick={handleCompareThese}
+              <Link
+                href={compareHref}
+                onClick={prepareCompareSelection}
                 className={cn(
                   buttonClass("primary", "md"),
                   "min-w-[14rem] px-5 text-[13px] font-semibold",
                 )}
               >
                 これらのサーバーを比較する
-              </button>
+              </Link>
             </div>
           </>
         )}

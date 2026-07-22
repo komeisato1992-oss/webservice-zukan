@@ -31,6 +31,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description:
       "気になるレンタルサーバーを並べて、料金・容量・機能を比較できます。",
     alternates: { canonical: `/${categorySlug}/compare` },
+    openGraph: {
+      title: "レンタルサーバー比較",
+      description:
+        "気になるレンタルサーバーを並べて、料金・容量・機能を比較できます。",
+      url: `/${categorySlug}/compare`,
+      type: "website",
+    },
   };
 }
 

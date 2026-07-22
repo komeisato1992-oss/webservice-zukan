@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
 import { SITE_BRAND, SITE_DESCRIPTION } from "@/lib/site/brand";
 
+/** 本番の正規オリジン（wwwなし）。Vercel のホストリダイレクトと一致させる。 */
+export const PRODUCTION_SITE_URL = "https://webservice-zukan.jp";
+
 export function getSiteUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  return raw && raw.length > 0 ? raw : "http://localhost:3000";
+  if (raw && raw.length > 0) return raw;
+  // 本番で env 未設定でも localhost が出力されないようにする
+  if (process.env.VERCEL_ENV === "production") return PRODUCTION_SITE_URL;
+  return "http://localhost:3000";
+}
+
+export function getDefaultOgImagePath(): string {
+  return "/images/og-default.jpg";
 }
 
 export const PAGE_META = {
@@ -63,32 +73,36 @@ export function buildPageMetadata(
     ? { absolute: page.title }
     : page.title;
 
+  const ogTitle = options?.absoluteTitle
+    ? page.title
+    : `${page.title} | ${SITE_BRAND}`;
+  const ogImage = getDefaultOgImagePath();
+
   return {
     title,
     description: page.description,
     alternates: { canonical: page.path },
     openGraph: {
-      title: options?.absoluteTitle
-        ? page.title
-        : `${page.title} | ${SITE_BRAND}`,
+      title: ogTitle,
       description: page.description,
       url,
       siteName: SITE_BRAND,
       locale: "ja_JP",
       type: "website",
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: "summary_large_image",
-      title: options?.absoluteTitle
-        ? page.title
-        : `${page.title} | ${SITE_BRAND}`,
+      title: ogTitle,
       description: page.description,
+      images: [ogImage],
     },
   };
 }
 
 export function buildRootMetadata(): Metadata {
   const siteUrl = getSiteUrl();
+  const ogImage = getDefaultOgImagePath();
   return {
     metadataBase: new URL(siteUrl),
     title: {
@@ -107,11 +121,16 @@ export function buildRootMetadata(): Metadata {
       title: SITE_BRAND,
       description: SITE_DESCRIPTION,
       url: siteUrl,
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: "summary_large_image",
       title: SITE_BRAND,
       description: SITE_DESCRIPTION,
+      images: [ogImage],
+    },
+    verification: {
+      google: "5wYXJUTIirUS2-BTe5XHLv9s6DiaimnXeZHNTME-bEo",
     },
   };
 }
@@ -130,6 +149,34 @@ export function buildBreadcrumbJsonLd(
       ...(item.path ? { item: `${siteUrl}${item.path}` } : {}),
     })),
   };
+}
+
+/** サイト全体の Organization / WebSite 構造化データ */
+export function buildSiteJsonLd() {
+  const siteUrl = getSiteUrl();
+  const logoUrl = `${siteUrl}/images/site-logo.png`;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: SITE_BRAND,
+      url: siteUrl,
+      logo: logoUrl,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_BRAND,
+      url: siteUrl,
+      description: SITE_DESCRIPTION,
+      inLanguage: "ja-JP",
+      publisher: {
+        "@type": "Organization",
+        name: SITE_BRAND,
+        url: siteUrl,
+      },
+    },
+  ];
 }
 
 export const NOINDEX_ROBOTS = {

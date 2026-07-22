@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import { buildBreadcrumbJsonLd } from "@/lib/site/seo";
 
 /** 統一アイコンサイズ（lucide） */
 export const ICON_SM = 14;
@@ -240,32 +241,45 @@ export function SectionShell({
   );
 }
 
-/** パンくず共通 */
+/** パンくず共通（HTML + BreadcrumbList JSON-LD） */
 export function Breadcrumb({
   items,
 }: {
   items: Array<{ href?: string; label: string }>;
 }) {
+  const jsonLd = buildBreadcrumbJsonLd(
+    items.map((item) => ({
+      name: item.label,
+      path: item.href,
+    })),
+  );
+
   return (
-    <nav aria-label="パンくず" className="text-[12px] text-[var(--text-muted)] sm:text-[13px]">
-      <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-        {items.map((item, i) => (
-          <li key={`${item.label}-${i}`} className="inline-flex items-center gap-1.5">
-            {i > 0 ? <span aria-hidden>/</span> : null}
-            {item.href ? (
-              <Link
-                href={item.href}
-                className="text-[var(--text-body)] hover:text-[var(--accent)]"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-[var(--text-primary)]">{item.label}</span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <nav aria-label="パンくず" className="text-[12px] text-[var(--text-muted)] sm:text-[13px]">
+        <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+          {items.map((item, i) => (
+            <li key={`${item.label}-${i}`} className="inline-flex items-center gap-1.5">
+              {i > 0 ? <span aria-hidden>/</span> : null}
+              {item.href ? (
+                <Link
+                  href={item.href}
+                  className="text-[var(--text-body)] hover:text-[var(--accent)]"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-[var(--text-primary)]">{item.label}</span>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </>
   );
 }
 

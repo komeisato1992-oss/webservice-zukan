@@ -37,7 +37,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("slug", categorySlug)
     .eq("is_published", true)
     .maybeSingle();
-  return { title: data ? `${data.name}のサービス一覧` : "サービス一覧" };
+  return {
+    title: data ? `${data.name}のサービス一覧` : "サービス一覧",
+    alternates: { canonical: `/${categorySlug}/services` },
+  };
 }
 
 export default async function CategoryServicesPage({ params }: Props) {

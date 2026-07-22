@@ -16,6 +16,7 @@ import { OfficialSiteButton } from "@/components/site/official-site-button";
 import { AddToCompareButton } from "@/components/site/compare/add-to-compare-button";
 import { SITE_BRAND } from "@/lib/site/brand";
 import { pickRepresentativePlan } from "@/lib/site/plan-utils";
+import { getDefaultOgImagePath, getSiteUrl } from "@/lib/site/seo";
 import {
   Breadcrumb,
   PageValueProps,
@@ -97,17 +98,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "サービス詳細" };
   }
   const service = metaService;
+  const selfPath = categoryPath(categorySlug, "services", service.slug);
+  const pageUrl = `${getSiteUrl()}${selfPath}`;
+  const title = service.seo_title || service.name;
+  const description =
+    service.seo_description || service.catchphrase || undefined;
+  const ogImage = service.og_image_url || getDefaultOgImagePath();
 
   return {
-    title: service.seo_title || service.name,
-    description: service.seo_description || service.catchphrase || undefined,
-    alternates: service.canonical_url
-      ? { canonical: service.canonical_url }
-      : undefined,
+    title,
+    description,
+    alternates: {
+      canonical: service.canonical_url || selfPath,
+    },
     openGraph: {
-      title: service.seo_title || service.name,
-      description: service.seo_description || service.catchphrase || undefined,
-      images: service.og_image_url ? [service.og_image_url] : undefined,
+      title,
+      description,
+      url: pageUrl,
+      images: [ogImage],
+      type: "website",
+      locale: "ja_JP",
+      siteName: SITE_BRAND,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

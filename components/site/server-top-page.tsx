@@ -23,6 +23,7 @@ import {
 import { buildCompareRows } from "@/lib/site/compare-rows";
 import { SITE_BRAND } from "@/lib/site/brand";
 import { categoryPath } from "@/lib/links";
+import { getSiteUrl } from "@/lib/site/seo";
 import type { PublicContentCard } from "@/lib/contents/types";
 import { PopularCompareTable } from "@/components/site/popular-compare-table";
 import { PurposePicker } from "@/components/site/purpose-picker";
@@ -365,7 +366,7 @@ function buildJsonLd({
   faqs: typeof SERVER_FAQS;
   categorySlug: string;
 }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}/${categorySlug}`;
 
   return [
@@ -390,7 +391,7 @@ function buildJsonLd({
       isPartOf: {
         "@type": "WebSite",
         name: SITE_BRAND,
-        url: pageUrl,
+        url: siteUrl,
       },
     },
     ...(latestContents.length > 0

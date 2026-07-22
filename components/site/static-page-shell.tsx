@@ -1,28 +1,17 @@
 import Link from "next/link";
 import { SITE_BRAND } from "@/lib/site/brand";
-import { buildBreadcrumbJsonLd } from "@/lib/site/seo";
 import { Breadcrumb, buttonClass } from "@/components/site/ui";
 
 export function StaticPageShell({
   title,
-  path,
   children,
 }: {
   title: string;
   path: string;
   children: React.ReactNode;
 }) {
-  const jsonLd = buildBreadcrumbJsonLd([
-    { name: SITE_BRAND, path: "/server" },
-    { name: title, path },
-  ]);
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <Breadcrumb
         items={[
           { href: "/server", label: SITE_BRAND },
