@@ -7,8 +7,8 @@ import type { Database } from "@/lib/types/database";
  * RLS の「公開データのみ」ポリシー前提。ページを dynamic にせずキャッシュ可能にする。
  */
 export function createPublicClient() {
-  const { url, anonKey } = getSupabasePublicEnv();
-  return createSupabaseClient<Database>(url, anonKey, {
+  const { url, publishableKey } = getSupabasePublicEnv();
+  return createSupabaseClient<Database>(url, publishableKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

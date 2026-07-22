@@ -13,12 +13,14 @@ import {
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
 
-  if (!url || !anon) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL / ANON_KEY が未設定です");
+  if (!url || !publishableKey) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY が未設定です",
+    );
   }
   if (!email || !password) {
     throw new Error(
@@ -26,7 +28,7 @@ async function main() {
     );
   }
 
-  const supabase = createClient(url, anon, {
+  const supabase = createClient(url, publishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
