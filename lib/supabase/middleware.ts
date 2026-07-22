@@ -32,6 +32,12 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAdminRoute = pathname.startsWith("/admin");
   const isLoginRoute = pathname === "/admin/login";
+  const isResetPasswordRoute = pathname === "/reset-password";
+
+  // パスワード再設定中は管理画面への自動リダイレクトをしない
+  if (isResetPasswordRoute) {
+    return supabaseResponse;
+  }
 
   if (isAdminRoute && !isLoginRoute) {
     if (!user) {

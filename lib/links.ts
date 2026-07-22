@@ -95,6 +95,7 @@ export const RESERVED_PATH_SEGMENTS = new Set([
   "auth",
   "api",
   "login",
+  "reset-password",
 ]);
 
 export function isReservedPathSegment(slug: string) {
