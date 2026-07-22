@@ -8,10 +8,15 @@ import {
   isPublicSiteService,
 } from "@/lib/site/public-data";
 
+/** ISR: Search Console 向けに定期更新 */
 export const revalidate = 300;
 
+/**
+ * App Router 標準の MetadataRoute.Sitemap。
+ * Next.js が /sitemap.xml を application/xml の XML として返す。
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = getSiteUrl();
+  const siteUrl = getSiteUrl().replace(/\/$/, "");
   const now = new Date();
 
   const staticEntries: MetadataRoute.Sitemap = [
@@ -82,17 +87,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("is_site_visible", true)
       .order("display_order", { ascending: true });
 
-    const services =
-      withVisible.error
-        ? (
-            await supabase
-              .from("services")
-              .select("slug, updated_at")
-              .eq("category_id", category.id)
-              .eq("is_published", true)
-              .order("display_order", { ascending: true })
-          ).data
-        : withVisible.data;
+    const services = withVisible.error
+      ? (
+          await supabase
+            .from("services")
+            .select("slug, updated_at")
+            .eq("category_id", category.id)
+            .eq("is_published", true)
+            .order("display_order", { ascending: true })
+        ).data
+      : withVisible.data;
 
     const visibleServices = (services ?? []).filter((service) =>
       withVisible.error
@@ -110,7 +114,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: service.updated_at
           ? new Date(service.updated_at)
           : now,
-        changeFrequency: "weekly" as const,
+        changeFrequency: "weekly",
         priority: 0.7,
       }),
     );
