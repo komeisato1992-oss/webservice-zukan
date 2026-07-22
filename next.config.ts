@@ -1,7 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["playwright"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/server",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

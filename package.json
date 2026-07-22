@@ -3,18 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint",
+    "playwright:install": "playwright install chromium",
+    "scrape:test:xserver": "npx tsx scripts/test-xserver-scrape.ts",
+    "scrape:test:conoha-wing": "npx tsx scripts/test-conoha-wing-scrape.ts",
+    "scrape:test:shin-server": "npx tsx scripts/test-shin-server-scrape.ts",
+    "scrape:test:lolipop": "npx tsx scripts/test-lolipop-scrape.ts",
+    "scrape:test:mixhost": "npx tsx scripts/test-mixhost-scrape.ts",
+    "scrape:test:sakura": "npx tsx scripts/test-sakura-scrape.ts",
+    "scrape:test:colorfulbox": "npx tsx scripts/test-colorfulbox-scrape.ts",
+    "scrape:test:new6": "npx tsx scripts/test-new6-scrape.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
+    "@supabase/supabase-js": "^2.110.7",
+    "exceljs": "^4.4.0",
+    "googleapis": "^173.0.0",
+    "lucide-react": "^1.25.0",
     "next": "16.2.10",
+    "playwright": "^1.61.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/exceljs": "^0.5.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
