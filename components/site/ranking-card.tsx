@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ManagedRankingCard } from "@/lib/site/rankings-public";
 import { categoryPath, resolveOutboundLink } from "@/lib/links";
 import { OfficialSiteButton } from "@/components/site/official-site-button";
-import { ServiceLogo } from "@/components/site/service-logo";
 import { buttonClass, cn } from "@/components/site/ui";
 
 const RANK_MEDAL: Record<1 | 2 | 3, string> = {
@@ -63,7 +62,7 @@ type Props = {
 
 /**
  * おすすめランキング / 条件別ランキング共通カード。
- * デザイン変更はここだけで反映する。
+ * 右側の表示項目は purposeId に応じて切り替わる（複製しない）。
  */
 export function RankingCard({ card, categorySlug, className }: Props) {
   const detailHref = categoryPath(
@@ -73,6 +72,7 @@ export function RankingCard({ card, categorySlug, className }: Props) {
   );
   const outbound = resolveOutboundLink(card.service, card.affiliateLinks);
   const rank = card.rank;
+  const secondary = card.secondaryMetric;
 
   return (
     <article
@@ -89,16 +89,7 @@ export function RankingCard({ card, categorySlug, className }: Props) {
         {rank}位
       </p>
 
-      <div className="mt-2 flex justify-center">
-        <ServiceLogo
-          name={card.service.name}
-          logoUrl={card.service.logo_url}
-          size="sm"
-          fallback="icon"
-        />
-      </div>
-
-      <h3 className="mt-2 text-center text-[18px] font-extrabold leading-snug tracking-tight text-[var(--text-primary)] sm:text-[19px]">
+      <h3 className="mt-2.5 text-center text-[19px] font-extrabold leading-snug tracking-tight text-[var(--text-primary)] sm:text-[20px]">
         <span className="jp-break">{card.service.name}</span>
       </h3>
 
@@ -120,11 +111,26 @@ export function RankingCard({ card, categorySlug, className }: Props) {
         {card.cardComment || "\u00A0"}
       </p>
 
-      <div className="mt-2 text-center">
-        <p className="text-[10px] text-[var(--text-muted)]">月額料金</p>
-        <p className="mt-0.5 text-[16px] font-bold tabular-nums text-[var(--navy)]">
-          {card.monthlyLabel}
-        </p>
+      <div
+        className={cn(
+          "mt-2 grid gap-x-2",
+          secondary ? "grid-cols-2" : "grid-cols-1",
+        )}
+      >
+        <div className={secondary ? "min-w-0 text-left" : "text-center"}>
+          <p className="text-[10px] text-[var(--text-muted)]">月額料金</p>
+          <p className="mt-0.5 text-[15px] font-bold tabular-nums leading-tight text-[var(--navy)] sm:text-[16px]">
+            {card.monthlyLabel}
+          </p>
+        </div>
+        {secondary ? (
+          <div className="min-w-0 text-right">
+            <p className="text-[10px] text-[var(--text-muted)]">{secondary.label}</p>
+            <p className="mt-0.5 text-[15px] font-bold tabular-nums leading-tight text-[var(--navy)] sm:text-[16px]">
+              <span className="jp-break">{secondary.value}</span>
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-auto flex flex-col gap-1.5 pt-3">

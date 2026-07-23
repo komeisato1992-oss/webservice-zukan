@@ -7,6 +7,15 @@ import { formatPlanLabelFromPlan } from "@/lib/site/service-name-display";
 import type { EnrichedService } from "@/lib/site/service-utils";
 import { isPublicSiteService } from "@/lib/site/public-data";
 import { pickRepresentativePlan } from "@/lib/site/plan-utils";
+import {
+  resolveRankingSecondaryMetric,
+  type RankingSecondaryMetric,
+} from "@/lib/site/ranking-metrics";
+import type {
+  ComparisonField,
+  ComparisonValue,
+  ServicePlan,
+} from "@/lib/types/database";
 
 export type ManagedRankingCard = {
   rank: 1 | 2 | 3;
@@ -15,7 +24,10 @@ export type ManagedRankingCard = {
   planId: string | null;
   planName: string | null;
   monthlyLabel: string;
+  /** @deprecated 互換用。secondaryMetric を優先 */
   storageLabel: string;
+  /** ランキング種別ごとの右側指標（月額料金が安い等は null） */
+  secondaryMetric: RankingSecondaryMetric | null;
   cardComment: string;
   subComment: string;
   /** 管理画面で設定した★（0〜5） */
@@ -39,6 +51,9 @@ type RankingRow = {
   sub_comment: string | null;
   is_visible: boolean;
 };
+
+const PLAN_SELECT =
+  "id, service_id, name, display_name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, storage_value, storage_unit, storage_type, free_trial_days, multi_domain_count, is_published, is_default_comparison_plan, display_order";
 
 /**
  * 公開済みランキングを取得。未設定カテゴリは空配列。
@@ -97,7 +112,7 @@ export const loadPublishedRankings = cache(
       ];
       if (!serviceIds.length) return map;
 
-      const [{ data: services }, { data: plans }, { data: affiliates }] =
+      const [{ data: services }, plansPrimary, { data: affiliates }] =
         await Promise.all([
           supabase
             .from("services")
@@ -107,9 +122,7 @@ export const loadPublishedRankings = cache(
             .in("id", serviceIds),
           supabase
             .from("service_plans")
-            .select(
-              "id, service_id, name, display_name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, storage_value, storage_unit, is_published, is_default_comparison_plan, display_order",
-            )
+            .select(PLAN_SELECT)
             .in("service_id", serviceIds)
             .eq("is_published", true),
           supabase
@@ -120,14 +133,31 @@ export const loadPublishedRankings = cache(
             .in("service_id", serviceIds),
         ]);
 
+      let plans = plansPrimary.data as ServicePlan[] | null;
+      if (plansPrimary.error) {
+        const legacy = await supabase
+          .from("service_plans")
+          .select(
+            "id, service_id, name, display_name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, storage_value, storage_unit, is_published, is_default_comparison_plan, display_order",
+          )
+          .in("service_id", serviceIds)
+          .eq("is_published", true);
+        plans = ((legacy.data ?? []) as ServicePlan[]).map((p) => ({
+          ...p,
+          storage_type: p.storage_type ?? null,
+          free_trial_days: p.free_trial_days ?? null,
+          multi_domain_count: p.multi_domain_count ?? null,
+        }));
+      }
+
       const serviceMap = new Map(
         ((services ?? []) as EnrichedService["service"][]).map((s) => [
           s.id,
           s,
         ]),
       );
-      const plansByService = new Map<string, unknown[]>();
-      for (const plan of (plans ?? []) as Array<{ service_id: string }>) {
+      const plansByService = new Map<string, ServicePlan[]>();
+      for (const plan of plans ?? []) {
         const list = plansByService.get(plan.service_id) ?? [];
         list.push(plan);
         plansByService.set(plan.service_id, list);
@@ -137,6 +167,54 @@ export const loadPublishedRankings = cache(
         const list = affByService.get(a.service_id) ?? [];
         list.push(a);
         affByService.set(a.service_id, list);
+      }
+
+      const categoryIds = [
+        ...new Set(
+          ((services ?? []) as Array<{ category_id: string }>)
+            .map((s) => s.category_id)
+            .filter(Boolean),
+        ),
+      ];
+
+      let fields: ComparisonField[] = [];
+      const valuesByService = new Map<string, Record<string, ComparisonValue>>();
+      const valuesByPlan = new Map<
+        string,
+        Record<string, Record<string, ComparisonValue>>
+      >();
+
+      if (categoryIds.length > 0) {
+        const [{ data: fieldRows }, { data: valueRows }] = await Promise.all([
+          supabase
+            .from("comparison_fields")
+            .select(
+              "id, category_id, name, slug, field_type, unit, description, display_group, select_options, display_order, is_filterable, is_highlighted, is_published, created_at, updated_at",
+            )
+            .in("category_id", categoryIds)
+            .eq("is_published", true),
+          supabase
+            .from("comparison_values")
+            .select(
+              "id, service_id, plan_id, comparison_field_id, boolean_value, number_value, text_value",
+            )
+            .in("service_id", serviceIds),
+        ]);
+
+        fields = (fieldRows ?? []) as ComparisonField[];
+        for (const value of (valueRows ?? []) as ComparisonValue[]) {
+          if (value.plan_id == null) {
+            const m = valuesByService.get(value.service_id) ?? {};
+            m[value.comparison_field_id] = value;
+            valuesByService.set(value.service_id, m);
+            continue;
+          }
+          const byPlan = valuesByPlan.get(value.service_id) ?? {};
+          const planMap = byPlan[value.plan_id] ?? {};
+          planMap[value.comparison_field_id] = value;
+          byPlan[value.plan_id] = planMap;
+          valuesByPlan.set(value.service_id, byPlan);
+        }
       }
 
       for (const row of rows) {
@@ -153,34 +231,36 @@ export const loadPublishedRankings = cache(
         const planList = plansByService.get(service.id) ?? [];
         const plan =
           (row.plan_id
-            ? (planList as Array<{ id: string }>).find(
-                (p) => p.id === row.plan_id,
-              )
-            : null) ?? pickRepresentativePlan(planList as never);
+            ? planList.find((p) => p.id === row.plan_id)
+            : null) ?? pickRepresentativePlan(planList);
 
-        const monthlyLabel = formatMonthlyPriceLabel(plan as never, "—");
+        const monthlyLabel = formatMonthlyPriceLabel(plan, "—");
         const storageLabel =
-          plan &&
-          typeof plan === "object" &&
-          "storage_value" in plan &&
-          (plan as { storage_value: number | null }).storage_value != null
-            ? formatStorage(
-                (plan as { storage_value: number }).storage_value,
-                (plan as { storage_unit?: string | null }).storage_unit,
-              )
+          plan?.storage_value != null
+            ? formatStorage(plan.storage_value, plan.storage_unit)
             : "—";
+
+        const categoryFields = fields.filter(
+          (f) => f.category_id === service.category_id,
+        );
+        const secondaryMetric = resolveRankingSecondaryMetric(row.purpose_id, {
+          plan,
+          fields: categoryFields,
+          comparisonByFieldId: valuesByService.get(service.id) ?? {},
+          comparisonByPlanId: plan
+            ? valuesByPlan.get(service.id)?.[plan.id]
+            : undefined,
+        });
 
         set.items.push({
           rank: row.rank as 1 | 2 | 3,
           purposeId: row.purpose_id,
           service,
-          planId:
-            plan && typeof plan === "object" && "id" in plan
-              ? String((plan as { id: string }).id)
-              : row.plan_id,
-          planName: formatPlanLabelFromPlan(plan as never),
+          planId: plan?.id ?? row.plan_id,
+          planName: formatPlanLabelFromPlan(plan),
           monthlyLabel,
           storageLabel,
+          secondaryMetric,
           cardComment: row.card_comment?.trim() || "",
           subComment: row.sub_comment?.trim() || "",
           rating:
