@@ -460,7 +460,8 @@ const getCachedPublishedCategoryBySlug = unstable_cache(
 
 const getCachedServerTopData = unstable_cache(
   fetchServerTopData,
-  ["server-top-data"],
+  // v2: plan 列（cpu/memory/transfer_amount 等）を select に含める形に変更
+  ["server-top-data-v2"],
   {
     revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
     tags: [PUBLIC_SITE_CACHE_TAG],
