@@ -113,18 +113,20 @@ export function RankingCard({ card, categorySlug, className }: Props) {
 
       <div
         className={cn(
-          "mt-2 grid gap-x-2",
-          secondary ? "grid-cols-2" : "grid-cols-1",
+          "mt-2",
+          secondary
+            ? "mx-auto grid w-[82%] max-w-[13.5rem] grid-cols-2 gap-x-3"
+            : "text-center",
         )}
       >
-        <div className={secondary ? "min-w-0 text-left" : "text-center"}>
+        <div className="min-w-0 text-center">
           <p className="text-[10px] text-[var(--text-muted)]">月額料金</p>
           <p className="mt-0.5 text-[15px] font-bold tabular-nums leading-tight text-[var(--navy)] sm:text-[16px]">
             {card.monthlyLabel}
           </p>
         </div>
         {secondary ? (
-          <div className="min-w-0 text-right">
+          <div className="min-w-0 text-center">
             <p className="text-[10px] text-[var(--text-muted)]">{secondary.label}</p>
             <p className="mt-0.5 text-[15px] font-bold tabular-nums leading-tight text-[var(--navy)] sm:text-[16px]">
               <span className="jp-break">{secondary.value}</span>
