@@ -370,3 +370,85 @@ export function isStorageTypeField(
     /ストレージ.?種類|storage.?type/i.test(`${field.slug} ${field.name}`)
   );
 }
+
+type PlanTextColumn =
+  | "cpu"
+  | "memory"
+  | "transfer_amount"
+  | "database_count"
+  | "multi_domain_count"
+  | "free_domain_count";
+
+const PLAN_BACKED_TEXT_FIELDS: Array<{
+  column: PlanTextColumn;
+  match: (field: Pick<ComparisonField, "slug" | "name">) => boolean;
+}> = [
+  {
+    column: "cpu",
+    match: (f) => f.slug === "cpu" || /^CPU$/i.test(f.name.trim()),
+  },
+  {
+    column: "memory",
+    match: (f) => f.slug === "memory" || /メモリ/.test(f.name),
+  },
+  {
+    column: "transfer_amount",
+    match: (f) =>
+      f.slug === "transfer" ||
+      f.slug === "transfer-amount" ||
+      f.slug === "transfer_limit" ||
+      /転送量/.test(f.name),
+  },
+  {
+    column: "database_count",
+    match: (f) =>
+      /database/.test(f.slug) || /データベース|DB数/.test(f.name),
+  },
+  {
+    column: "multi_domain_count",
+    match: (f) =>
+      /multi[-_]?domain/.test(f.slug) || /マルチドメイン/.test(f.name),
+  },
+  {
+    column: "free_domain_count",
+    match: (f) =>
+      f.slug === "free-domain" || /無料ドメイン/.test(f.name),
+  },
+];
+
+function planColumnText(
+  plan: ServicePlan | null | undefined,
+  column: PlanTextColumn,
+): string | null {
+  if (!plan) return null;
+  const raw = plan[column];
+  if (raw == null) return null;
+  const text = String(raw).trim();
+  return text || null;
+}
+
+/**
+ * 管理画面のプラン列（cpu / memory / transfer_amount 等）を優先し、
+ * 未設定時のみ comparison_values を使う。
+ * 対象外フィールドは null。
+ */
+export function resolvePlanBackedTextField(
+  item: EnrichedService,
+  field: Pick<ComparisonField, "id" | "slug" | "name">,
+  empty = "-",
+): { text: string; raw: string | null } | null {
+  const entry = PLAN_BACKED_TEXT_FIELDS.find((e) => e.match(field));
+  if (!entry) return null;
+
+  const fromPlan = planColumnText(item.representativePlan, entry.column);
+  if (fromPlan) return { text: fromPlan, raw: fromPlan };
+
+  const value = item.comparisonByFieldId[field.id];
+  const fromText = value?.text_value?.trim();
+  if (fromText) return { text: fromText, raw: fromText };
+  if (value?.number_value != null && !Number.isNaN(Number(value.number_value))) {
+    const n = String(value.number_value);
+    return { text: n, raw: n };
+  }
+  return { text: empty, raw: null };
+}

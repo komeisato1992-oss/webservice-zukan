@@ -23,6 +23,7 @@ import {
   isFreeTrialField,
   isStorageTypeField,
   resolveActiveCampaignText,
+  resolvePlanBackedTextField,
   resolveStorageTypeText,
   resolveTrialDays,
 } from "@/lib/site/compare-formatters";
@@ -277,6 +278,10 @@ function fieldCell(
       raw: gb,
     };
   }
+
+  // CPU / メモリ / 転送量 等: service_plans 列を優先（comparison_values はフォールバック）
+  const fromPlanColumn = resolvePlanBackedTextField(item, field, empty);
+  if (fromPlanColumn) return fromPlanColumn;
 
   const value = item.comparisonByFieldId[field.id] ?? null;
   if (!hasComparisonValue(field, value)) {

@@ -90,7 +90,7 @@ export function isPublicSiteService(service: {
 }
 
 const PLAN_PUBLIC_COLUMNS =
-  "id, service_id, name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, storage_type, free_trial_days, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, created_at, updated_at";
+  "id, service_id, name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, storage_type, free_trial_days, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, cpu, memory, transfer_amount, free_domain_count, multi_domain_count, database_count, created_at, updated_at";
 
 const CAMPAIGN_PUBLIC_COLUMNS =
   "id, service_id, name, summary, target_plan_ids, discount_rate, discount_amount, ends_on, is_published, display_order";
@@ -252,7 +252,7 @@ async function fetchServerTopDataInner(
       ? await supabase
           .from("service_plans")
           .select(
-            "id, service_id, name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, storage_type, free_trial_days, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, created_at, updated_at",
+            "id, service_id, name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, storage_type, free_trial_days, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, cpu, memory, transfer_amount, free_domain_count, multi_domain_count, database_count, created_at, updated_at",
           )
           .in("service_id", serviceIds)
           .eq("is_published", true)
