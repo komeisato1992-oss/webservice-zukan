@@ -303,10 +303,8 @@ export const DOMAIN_FAQS: FaqItem[] = [
 
 export const DOMAIN_PAGE_SECTION_NAV = [
   { href: "#recommended-ranking", label: "人気ランキング" },
-  { href: "#compare-groups", label: "比較で選ぶ" },
   { href: "#domain-compare-table", label: "比較表" },
   { href: "#all-services", label: "サービス一覧" },
-  { href: "#articles", label: "お役立ち記事" },
   { href: "#beginner", label: "初心者向け" },
   { href: "#faq", label: "FAQ" },
 ] as const;

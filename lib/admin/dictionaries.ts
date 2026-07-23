@@ -89,22 +89,25 @@ export const listDictionaries = cache(async (): Promise<Dictionary[]> => {
 
 export const getDictionaryBySlug = cache(
   async (slug: string): Promise<Dictionary | null> => {
+    const normalized = typeof slug === "string" ? slug.trim() : "";
+    if (!normalized) return null;
+
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
         .from("dictionaries")
         .select("*")
-        .eq("slug", slug)
+        .eq("slug", normalized)
         .maybeSingle();
 
       if (error) {
         console.error("[dictionaries] getBySlug failed:", error.message);
-        return fallbackDictionary(slug);
+        return fallbackDictionary(normalized);
       }
-      return data ?? fallbackDictionary(slug);
+      return data ?? fallbackDictionary(normalized);
     } catch (error) {
       console.error("[dictionaries] getBySlug threw:", error);
-      return fallbackDictionary(slug);
+      return fallbackDictionary(normalized);
     }
   },
 );

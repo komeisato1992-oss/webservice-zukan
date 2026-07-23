@@ -39,6 +39,8 @@ export async function middleware(request: NextRequest) {
   if (hostRedirect) return hostRedirect;
 
   const pathname = request.nextUrl.pathname;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
 
   if (!hasSupabasePublicEnv()) {
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
@@ -47,7 +49,9 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("error", "env");
       return NextResponse.redirect(url);
     }
-    return NextResponse.next();
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   return updateSession(request);

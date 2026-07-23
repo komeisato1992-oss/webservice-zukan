@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { DOMAIN_COMPARISON_ITEM_DEFS } from "@/lib/admin/domain-comparison-items";
 import type { ActionResult } from "@/lib/actions/admin";
 import type { DomainComparisonItem } from "@/lib/types/database";
+import { revalidatePublicSiteCache } from "@/lib/site/cache";
 
 export type DomainComparisonItemSaveRow = {
   id: string;
@@ -81,11 +82,16 @@ export async function ensureDomainComparisonItems(
 }
 
 export async function saveDomainComparisonItemsAction(
+  dictionaryId: string,
   rows: DomainComparisonItemSaveRow[],
 ): Promise<ActionResult> {
   const { supabase, admin } = await requireAdmin();
   if (!admin) {
     return { ok: false, message: "管理者権限が必要です。" };
+  }
+
+  if (!dictionaryId) {
+    return { ok: false, message: "図鑑IDが必要です。" };
   }
 
   if (!Array.isArray(rows) || rows.length === 0) {
@@ -94,7 +100,8 @@ export async function saveDomainComparisonItemsAction(
 
   const { data: dictionary } = await supabase
     .from("dictionaries")
-    .select("id")
+    .select("id, slug")
+    .eq("id", dictionaryId)
     .eq("slug", "domain")
     .maybeSingle();
 
@@ -145,5 +152,7 @@ export async function saveDomainComparisonItemsAction(
   }
 
   revalidatePath("/admin/domain/comparison-items");
-  return { ok: true, message: "下書きを保存しました。" };
+  revalidatePath("/domain");
+  revalidatePublicSiteCache();
+  return { ok: true, message: "保存しました。公開TOP比較表へ反映されます。" };
 }

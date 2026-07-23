@@ -4,7 +4,15 @@ import { getSupabasePublicEnv } from "@/lib/env";
 import type { Database } from "@/lib/types/database";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: (() => {
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("x-pathname", request.nextUrl.pathname);
+        return requestHeaders;
+      })(),
+    },
+  });
 
   const { url, publishableKey } = getSupabasePublicEnv();
 
@@ -17,7 +25,11 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        supabaseResponse = NextResponse.next({ request });
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("x-pathname", request.nextUrl.pathname);
+        supabaseResponse = NextResponse.next({
+          request: { headers: requestHeaders },
+        });
         cookiesToSet.forEach(({ name, value, options }) => {
           supabaseResponse.cookies.set(name, value, options);
         });

@@ -38,5 +38,10 @@ export default async function ComparisonItemsPage({ params }: Props) {
     );
   }
 
-  return <DomainComparisonItemsEditor initialItems={items} />;
+  return (
+    <DomainComparisonItemsEditor
+      dictionaryId={dictionary.id}
+      initialItems={items}
+    />
+  );
 }

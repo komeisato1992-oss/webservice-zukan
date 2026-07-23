@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCompare } from "@/components/site/compare/compare-context";
 import { categoryPath } from "@/lib/links";
 import { PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
+import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
 import { buttonClass, ICON_SM } from "@/components/site/ui";
 
 /** 選択中のみ表示する画面下部の固定比較バー（0件時は非表示） */
 export function CompareBar() {
+  const pathname = usePathname();
   const { items, remove, clear } = useCompare();
 
+  // ドメイン図鑑は TOP 内比較表のみ（比較ページ・比較バーなし）
+  if (pathname?.startsWith(`/${DOMAIN_CATEGORY_SLUG}`)) return null;
   if (items.length === 0) return null;
 
   const categorySlug = items[0]?.categorySlug ?? PRIMARY_CATEGORY_SLUG;

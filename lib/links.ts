@@ -89,6 +89,7 @@ export const SERVICE_STATUS_LABELS: Record<string, string> = {
 export const RESERVED_PATH_SEGMENTS = new Set([
   "admin",
   "articles",
+  "guides",
   "about",
   "privacy",
   "contact",

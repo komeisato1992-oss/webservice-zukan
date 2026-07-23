@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { hasSupabasePublicEnv } from "@/lib/env";
 import { isReservedPathSegment } from "@/lib/links";
 import { SITE_BRAND, PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
+import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
 import { buildPageMetadata } from "@/lib/site/seo";
 import { loadServerTopData } from "@/lib/site/public-data";
 import { getDefaultComparisonSlugs } from "@/lib/site/default-comparison-services";
@@ -20,6 +21,9 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { categorySlug } = await params;
+  if (categorySlug === DOMAIN_CATEGORY_SLUG) {
+    return { title: "ドメインサービス比較" };
+  }
   if (categorySlug === PRIMARY_CATEGORY_SLUG) {
     return buildPageMetadata("compare");
   }
@@ -44,6 +48,11 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
   if (isReservedPathSegment(categorySlug) || !hasSupabasePublicEnv()) {
     notFound();
+  }
+
+  // ドメイン図鑑は TOP 内比較表のみ。比較ページは使わない。
+  if (categorySlug === DOMAIN_CATEGORY_SLUG) {
+    redirect("/domain#domain-compare-table");
   }
 
   let data;

@@ -317,12 +317,14 @@ export default async function ServiceDetailPage({ params }: Props) {
               </dl>
 
               <div className="mt-5 flex flex-wrap gap-2.5">
-                <AddToCompareButton
-                  slug={service.slug}
-                  name={service.name}
-                  categorySlug={category.slug}
-                  emphasis="primary"
-                />
+                {category.slug !== DOMAIN_CATEGORY_SLUG ? (
+                  <AddToCompareButton
+                    slug={service.slug}
+                    name={service.name}
+                    categorySlug={category.slug}
+                    emphasis="primary"
+                  />
+                ) : null}
                 {outbound ? (
                   <OfficialSiteButton
                     href={outbound.href}

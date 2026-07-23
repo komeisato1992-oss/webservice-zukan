@@ -35,7 +35,23 @@ export default async function AdminServicesPage({
   const { dictionarySlug } = await params;
   const queryParams = await searchParams;
   const dictionary = await getDictionaryBySlug(dictionarySlug);
-  if (!dictionary) notFound();
+  // 既知図鑑はフォールバック込みで必ず解決する。未解決時のみ404。
+  if (!dictionary) {
+    if (isKnownDictionarySlug(dictionarySlug)) {
+      return (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-10 text-center">
+          <h1 className="text-lg font-bold text-amber-950">
+            図鑑情報を読み込めませんでした
+          </h1>
+          <p className="mt-2 text-sm text-amber-900/90">
+            「{dictionarySlug}」は既知の図鑑ですが、データの取得に失敗しました。
+            ページを再読み込みするか、マイグレーション適用状況を確認してください。
+          </p>
+        </div>
+      );
+    }
+    notFound();
+  }
   const isDomain = dictionary.slug === "domain";
 
   // DB一時障害時は本サイト404に落とさず、管理画面内でエラー表示する

@@ -8,7 +8,9 @@ import { usePathname } from "next/navigation";
 import { SITE_BRAND, SITE_NAV } from "@/lib/site/brand";
 import {
   DOMAIN_BRAND,
-  DOMAIN_BRAND_SUB,
+  DOMAIN_LOGO_HEIGHT,
+  DOMAIN_LOGO_SRC,
+  DOMAIN_LOGO_WIDTH,
   DOMAIN_NAV,
 } from "@/lib/site/domain-brand";
 import { cn } from "@/components/site/ui";
@@ -17,7 +19,7 @@ type Props = {
   servicesHref: string;
 };
 
-/** ロゴ原寸 825×179。ヘッダーは従来の約2倍高さで表示 */
+/** サーバー図鑑ロゴ原寸 825×179。ヘッダーは従来の約2倍高さで表示 */
 const LOGO_WIDTH = 280;
 const LOGO_HEIGHT = 61;
 
@@ -95,20 +97,23 @@ export function SiteHeaderClient({ servicesHref }: Props) {
           className={cn(
             "inline-flex min-w-0 shrink items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
             isDomain
-              ? "max-w-[min(100%,14rem)] flex-col items-start gap-0.5 sm:max-w-[min(100%,16rem)]"
+              ? "max-w-[min(100%,16.5rem)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--domain-navy,#045a57)] sm:max-w-[min(100%,19rem)]"
               : "max-w-[min(100%,16.5rem)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--navy-deep)] sm:max-w-[min(100%,19rem)]",
           )}
           aria-label={brand}
         >
           {isDomain ? (
-            <>
-              <span className="text-[15px] font-extrabold tracking-tight text-white sm:text-[17px]">
-                {DOMAIN_BRAND}
-              </span>
-              <span className="text-[10px] font-medium tracking-wide text-white/70 sm:text-[11px]">
-                {DOMAIN_BRAND_SUB}
-              </span>
-            </>
+            <Image
+              src={DOMAIN_LOGO_SRC}
+              alt={DOMAIN_BRAND}
+              width={DOMAIN_LOGO_WIDTH}
+              height={DOMAIN_LOGO_HEIGHT}
+              priority
+              className={cn(
+                "h-14 w-auto max-w-full object-contain object-left",
+                compact ? "sm:h-[3.25rem]" : "sm:h-16",
+              )}
+            />
           ) : (
             <Image
               src="/images/site-logo.png"

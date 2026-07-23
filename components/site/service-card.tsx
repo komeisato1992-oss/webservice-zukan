@@ -182,12 +182,14 @@ export function ServiceCard({
       ) : null}
 
       <div className="mt-auto flex flex-col gap-1.5 pt-3">
-        <AddToCompareButton
-          slug={service.slug}
-          name={service.name}
-          categorySlug={categorySlug}
-          emphasis="primary"
-        />
+        {!isDomain ? (
+          <AddToCompareButton
+            slug={service.slug}
+            name={service.name}
+            categorySlug={categorySlug}
+            emphasis="primary"
+          />
+        ) : null}
         <div className="flex items-center gap-2">
           <Link
             href={detailHref}

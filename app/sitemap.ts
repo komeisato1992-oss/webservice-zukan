@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { hasSupabasePublicEnv } from "@/lib/env";
+import { listGuides } from "@/lib/guides/registry";
 import { PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
 import { PAGE_META, getSiteUrl } from "@/lib/site/seo";
 import { createPublicClient } from "@/lib/supabase/public";
@@ -18,6 +19,21 @@ export const revalidate = 300;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl().replace(/\/$/, "");
   const now = new Date();
+
+  const guideEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${siteUrl}/guides`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    ...listGuides().map((guide) => ({
+      url: `${siteUrl}/guides/${guide.slug}`,
+      lastModified: new Date(guide.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+  ];
 
   const staticEntries: MetadataRoute.Sitemap = [
     {
@@ -62,6 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.4,
     },
+    ...guideEntries,
   ];
 
   if (!hasSupabasePublicEnv()) {

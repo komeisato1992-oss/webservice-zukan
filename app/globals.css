@@ -603,20 +603,33 @@ a[class*="button"],
 .hero-domain {
   position: relative;
   overflow: hidden;
-  min-height: 400px;
+  /* Compact hero (~2/3 of previous height) */
+  min-height: 268px;
   background-color: #078f8a;
 }
 
 @media (min-width: 768px) {
   .hero-domain {
-    min-height: 420px;
+    min-height: 280px;
   }
 }
 
 @media (min-width: 1024px) {
   .hero-domain {
-    min-height: 460px;
+    min-height: 308px;
   }
+}
+
+/* Domain hero: tighter left readability wash */
+[data-site-theme="domain"] .hero-copy-local::before {
+  inset: -0.5rem -0.75rem -0.65rem -0.9rem;
+  border-radius: 1rem;
+  background: radial-gradient(
+    ellipse 80% 70% at 18% 38%,
+    rgba(3, 16, 42, 0.26) 0%,
+    rgba(3, 16, 42, 0.08) 48%,
+    transparent 70%
+  );
 }
 
 .hero-domain-photo {
@@ -722,7 +735,25 @@ a[class*="button"],
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--navy);
+  color: #056663;
+}
+
+/* Price rank emphasis (1=strongest emerald → 3=soft) */
+.domain-compare-table .domain-price-rank-1 {
+  background: rgba(5, 102, 99, 0.14);
+  color: #045a57;
+}
+.domain-compare-table .domain-price-rank-1 .domain-compare-best-badge {
+  background: rgba(5, 102, 99, 0.18);
+  color: #045a57;
+}
+.domain-compare-table .domain-price-rank-2 {
+  background: rgba(8, 127, 120, 0.1);
+  color: #067571;
+}
+.domain-compare-table .domain-price-rank-3 {
+  background: rgba(8, 184, 176, 0.1);
+  color: #088f88;
 }
 
 .domain-compare-table .domain-compare-accordion-btn {

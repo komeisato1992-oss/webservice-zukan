@@ -72,6 +72,29 @@ const TLD_LABEL_BY_PREFIX: Record<string, string> = {
   net: ".net",
 };
 
+/** 公開比較表向けの TLD 表示名（内部キー・DB は変更しない） */
+const TLD_PUBLIC_DISPLAY_LABEL: Record<string, string> = {
+  com: ".com",
+  jp: ".jp",
+  co_jp: "日本語.jp",
+  net: ".net",
+};
+
+export function domainTldPublicLabel(
+  tldPrefixOrLabel: string | null | undefined,
+): string {
+  if (!tldPrefixOrLabel) return "";
+  if (TLD_PUBLIC_DISPLAY_LABEL[tldPrefixOrLabel]) {
+    return TLD_PUBLIC_DISPLAY_LABEL[tldPrefixOrLabel];
+  }
+  // ".co.jp" などラベルからの変換
+  const fromLabel = Object.entries(TLD_LABEL_BY_PREFIX).find(
+    ([, label]) => label === tldPrefixOrLabel,
+  );
+  if (fromLabel) return TLD_PUBLIC_DISPLAY_LABEL[fromLabel[0]] ?? tldPrefixOrLabel;
+  return tldPrefixOrLabel;
+}
+
 export function parseDomainPriceItemKey(itemKey: string): {
   tldPrefix: string;
   tldLabel: string;
@@ -172,15 +195,13 @@ export function getDomainDetailValue(
 }
 
 /**
- * 比較表初期表示サービス（最大5社）
- * 1. 総合おすすめランキング順位
- * 2. display_order
- * 3. updated_at（新しい順）
+ * 比較表表示サービス（公開中の全件）
+ * 並び: 総合おすすめランキング順位 → display_order → updated_at（新しい順）
  */
 export function pickDomainCompareServices(
   services: EnrichedService[],
   overallItems: ManagedRankingCard[] = [],
-  limit = 5,
+  limit = Number.POSITIVE_INFINITY,
 ): EnrichedService[] {
   const byId = new Map(services.map((s) => [s.service.id, s]));
   const picked: EnrichedService[] = [];
@@ -228,6 +249,62 @@ export function visiblePriceRowsForKind(
   );
 }
 
+export type DomainPriceTldGroup = {
+  tldPrefix: string;
+  /** 公開表示用（例: 日本語.jp） */
+  tldLabel: string;
+  sortOrder: number;
+  registration: DomainCompareItemView | null;
+  renewal: DomainCompareItemView | null;
+  transfer: DomainCompareItemView | null;
+};
+
+/**
+ * 料金グループを TLD 単位にまとめる（取得・更新・移管を1行で表示するため）。
+ * TLD 行は、その TLD の料金項目が1つでも is_visible なら出す。
+ * セル内は常に取得／更新／移管の3行を出すため、非表示項目もグループに保持する。
+ */
+export function visiblePriceTldGroups(
+  items: DomainCompareItemView[],
+): DomainPriceTldGroup[] {
+  const allPriceItems = items
+    .filter((i) => i.group_key === "price")
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  const byPrefix = new Map<string, DomainPriceTldGroup>();
+
+  for (const item of allPriceItems) {
+    const parsed = parseDomainPriceItemKey(item.item_key);
+    if (!parsed) continue;
+    const { tldPrefix, priceKind } = parsed;
+
+    let group = byPrefix.get(tldPrefix);
+    if (!group) {
+      group = {
+        tldPrefix,
+        tldLabel: domainTldPublicLabel(tldPrefix),
+        sortOrder: item.sort_order,
+        registration: null,
+        renewal: null,
+        transfer: null,
+      };
+      byPrefix.set(tldPrefix, group);
+    }
+    group[priceKind] = item;
+    if (item.is_visible) {
+      group.sortOrder = Math.min(group.sortOrder, item.sort_order);
+    }
+  }
+
+  return [...byPrefix.values()]
+    .filter((group) =>
+      [group.registration, group.renewal, group.transfer].some(
+        (item) => item?.is_visible,
+      ),
+    )
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
 /**
  * 最安判定。null は除外。正式な 0 は候補に含める。
  */
@@ -240,6 +317,47 @@ export function findCheapestServiceIds(
   if (entries.length === 0) return new Set();
   const min = Math.min(...entries.map(([, v]) => v));
   return new Set(entries.filter(([, v]) => v === min).map(([id]) => id));
+}
+
+export type DomainPriceRank = 1 | 2 | 3;
+
+/**
+ * 同一ドメイン・同一料金種別での料金順位（競技順位）。
+ * 未入力・null・NaN は除外。明示的な 0 は有効な料金として含める。
+ * 同額は同順位。1〜3位のみ返す（4位以下はキー無し）。
+ */
+export function rankComparablePrices(
+  valuesByServiceId: Record<string, number | null | undefined>,
+): Record<string, DomainPriceRank> {
+  const eligible = Object.entries(valuesByServiceId).filter(
+    (entry): entry is [string, number] => {
+      const v = entry[1];
+      return (
+        typeof v === "number" &&
+        Number.isFinite(v) &&
+        !Number.isNaN(v)
+      );
+    },
+  );
+  if (eligible.length === 0) return {};
+
+  const sorted = [...eligible].sort((a, b) => a[1] - b[1]);
+  const ranks: Record<string, DomainPriceRank> = {};
+  let i = 0;
+  while (i < sorted.length) {
+    const value = sorted[i][1];
+    const rank = i + 1;
+    let j = i + 1;
+    while (j < sorted.length && sorted[j][1] === value) j += 1;
+    if (rank <= 3) {
+      const capped = rank as DomainPriceRank;
+      for (let k = i; k < j; k += 1) {
+        ranks[sorted[k][0]] = capped;
+      }
+    }
+    i = j;
+  }
+  return ranks;
 }
 
 export { DOMAIN_COMPARISON_GROUP_LABELS, DOMAIN_COMPARISON_GROUP_ORDER };

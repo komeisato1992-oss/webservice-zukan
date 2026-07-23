@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { SITE_BRAND, SITE_FOOTER_GROUPS } from "@/lib/site/brand";
 import {
   DOMAIN_BRAND,
-  DOMAIN_BRAND_SUB,
   DOMAIN_DESCRIPTION,
   DOMAIN_FOOTER_GROUPS,
+  DOMAIN_LOGO_HEIGHT,
+  DOMAIN_LOGO_SRC,
+  DOMAIN_LOGO_WIDTH,
 } from "@/lib/site/domain-brand";
 
 export function SiteFooterClient() {
@@ -31,15 +33,17 @@ export function SiteFooterClient() {
             <div className="col-span-2 min-w-0 sm:col-span-2 lg:col-span-1">
               <Link
                 href="/domain"
-                className="inline-flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                className="inline-flex max-w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 aria-label={DOMAIN_BRAND}
               >
-                <span className="text-lg font-extrabold tracking-tight text-white sm:text-xl">
-                  {DOMAIN_BRAND}
-                </span>
-                <span className="mt-0.5 text-[11px] text-white/70">
-                  {DOMAIN_BRAND_SUB}
-                </span>
+                <Image
+                  src={DOMAIN_LOGO_SRC}
+                  alt={DOMAIN_BRAND}
+                  width={DOMAIN_LOGO_WIDTH}
+                  height={DOMAIN_LOGO_HEIGHT}
+                  sizes="(max-width: 640px) 240px, 320px"
+                  className="h-[3.25rem] w-auto max-w-full object-contain object-left sm:h-[3.75rem]"
+                />
               </Link>
               <p className="mt-3 text-xs leading-relaxed text-white/80 sm:mt-4 sm:text-sm">
                 {DOMAIN_DESCRIPTION}

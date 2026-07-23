@@ -20,7 +20,7 @@ export const SITE_NAV = [
   { href: "/server", label: "TOP" },
   { href: "/server/services", label: "サービス一覧" },
   { href: "/server/compare", label: "比較" },
-  { href: "/server#guide", label: "選び方", hash: "guide" },
+  { href: "/guides", label: "ガイド" },
 ] as const;
 
 export const SITE_FOOTER_GROUPS = [
@@ -30,7 +30,7 @@ export const SITE_FOOTER_GROUPS = [
       { href: "/server", label: "TOP" },
       { href: "/server/services", label: "サービス一覧" },
       { href: "/server/compare", label: "比較" },
-      { href: "/server#guide", label: "選び方" },
+      { href: "/guides", label: "ガイド" },
     ],
   },
   {

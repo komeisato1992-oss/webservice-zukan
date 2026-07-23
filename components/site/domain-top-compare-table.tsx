@@ -6,16 +6,16 @@ import { ChevronDown } from "lucide-react";
 import {
   DOMAIN_COMPARISON_GROUP_LABELS,
   DOMAIN_COMPARISON_GROUP_ORDER,
-  DOMAIN_PRICE_KIND_TABS,
-  findCheapestServiceIds,
   formatDomainPrice,
   formatDomainStatus,
   getDomainDetailValue,
   pickDomainCompareServices,
+  rankComparablePrices,
   visibleItemsForGroup,
-  visiblePriceRowsForKind,
+  visiblePriceTldGroups,
   type DomainCompareItemView,
-  type DomainPriceKind,
+  type DomainPriceRank,
+  type DomainPriceTldGroup,
 } from "@/lib/site/domain-compare";
 import type { DomainServiceDetails } from "@/lib/types/database";
 import type { EnrichedService } from "@/lib/site/service-utils";
@@ -26,7 +26,6 @@ import { OfficialSiteButton } from "@/components/site/official-site-button";
 import {
   SectionHeader,
   SectionShell,
-  buttonClass,
   cn,
 } from "@/components/site/ui";
 
@@ -41,7 +40,7 @@ type Props = {
 const LABEL_W =
   "w-[6.5rem] min-w-[5.75rem] max-w-[6.875rem] sm:w-[7rem]";
 const SERVICE_W =
-  "w-[9.5rem] min-w-[8.75rem] max-w-[10rem] sm:w-[10rem]";
+  "w-[10.25rem] min-w-[9.75rem] max-w-[11.25rem] sm:w-[10.75rem]";
 
 export function DomainTopCompareTable({
   categorySlug,
@@ -52,10 +51,9 @@ export function DomainTopCompareTable({
 }: Props) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     price: true,
-    feature: false,
-    support: false,
+    feature: true,
+    support: true,
   });
-  const [priceKind, setPriceKind] = useState<DomainPriceKind>("registration");
   const [hoverCol, setHoverCol] = useState<string | null>(null);
 
   const columns = useMemo(
@@ -63,12 +61,9 @@ export function DomainTopCompareTable({
       pickDomainCompareServices(
         services,
         managedRankings.overall?.items ?? [],
-        5,
       ),
     [services, managedRankings],
   );
-
-  const compareHref = categoryPath(categorySlug, "compare");
 
   function toggleGroup(key: string) {
     setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -78,29 +73,22 @@ export function DomainTopCompareTable({
     <SectionShell
       id="domain-compare-table"
       tone="gray"
-      className="!py-[calc(var(--section-py)*0.4)] sm:!py-[calc(var(--section-py-md)*0.4)]"
+      className="!py-0"
+      innerClassName="!pt-3.5 !pb-5 sm:!pt-6 sm:!pb-7"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <SectionHeader
-          title="ドメインサービスを比較"
-          description="取得・更新・移管料金や機能、サポートをまとめて比較できます。"
-          emphasis
-          className="!mb-0"
-        />
-        <Link
-          href={compareHref}
-          className="inline-flex min-h-11 shrink-0 items-center justify-center text-[13px] font-semibold text-[var(--navy)] underline-offset-2 hover:underline"
-        >
-          すべてのサービスを比較する
-        </Link>
-      </div>
+      <SectionHeader
+        title="ドメインサービスを比較"
+        description="公開中のドメインサービスを、取得・更新・移管料金や機能、サポートでまとめて比較できます。"
+        emphasis
+        className="!mb-0 max-w-3xl [&_h2]:text-[1.5rem] sm:[&_h2]:text-[1.75rem] lg:[&_h2]:text-[1.875rem]"
+      />
 
       {columns.length === 0 ? (
-        <p className="mt-4 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-white px-4 py-8 text-center text-sm text-[var(--text-body)]">
+        <p className="mt-3 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-white px-4 py-6 text-center text-sm text-[var(--text-body)]">
           比較できる公開サービスはまだありません。
         </p>
       ) : (
-        <div className="domain-compare-table compare-app mt-4 sm:mt-5">
+        <div className="domain-compare-table compare-app mt-3.5 sm:mt-4">
           <p className="mb-2 text-[11px] text-[var(--text-muted)] sm:hidden">
             横にスクロールして比較できます →
           </p>
@@ -156,9 +144,9 @@ export function DomainTopCompareTable({
                         : groupKey === "support"
                           ? visibleItemsForGroup(comparisonItems, "support")
                           : [];
-                    const priceRows =
+                    const priceGroups =
                       groupKey === "price"
-                        ? visiblePriceRowsForKind(comparisonItems, priceKind)
+                        ? visiblePriceTldGroups(comparisonItems)
                         : [];
 
                     return (
@@ -171,59 +159,24 @@ export function DomainTopCompareTable({
                         colSpan={columns.length + 1}
                       >
                         {groupKey === "price" ? (
-                          <>
-                            <tr className="border-b border-[var(--domain-compare-border)] bg-white">
-                              <td
-                                colSpan={columns.length + 1}
-                                className="px-2 py-2"
-                              >
-                                <div
-                                  className="flex flex-wrap gap-1.5"
-                                  role="tablist"
-                                  aria-label="料金種別"
-                                >
-                                  {DOMAIN_PRICE_KIND_TABS.map((tab) => {
-                                    const active = priceKind === tab.kind;
-                                    return (
-                                      <button
-                                        key={tab.kind}
-                                        type="button"
-                                        role="tab"
-                                        aria-selected={active}
-                                        onClick={() => setPriceKind(tab.kind)}
-                                        className={cn(
-                                          "inline-flex h-9 min-h-9 items-center rounded-lg px-3 text-[12px] font-medium transition",
-                                          active
-                                            ? "bg-[var(--navy)] text-white"
-                                            : "border border-[var(--domain-compare-border)] bg-white text-[var(--text-body)] hover:border-[var(--navy)]/35",
-                                        )}
-                                      >
-                                        {tab.label}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </td>
-                            </tr>
-                            {priceRows.length === 0 ? (
-                              <EmptyRow
-                                colSpan={columns.length + 1}
-                                message="表示中の料金項目がありません"
+                          priceGroups.length === 0 ? (
+                            <EmptyRow
+                              colSpan={columns.length + 1}
+                              message="表示中の料金項目がありません"
+                            />
+                          ) : (
+                            priceGroups.map((group, idx) => (
+                              <PriceTldRow
+                                key={group.tldPrefix}
+                                group={group}
+                                columns={columns}
+                                detailsByServiceId={detailsByServiceId}
+                                stripe={idx % 2 === 1}
+                                hoverCol={hoverCol}
+                                onHoverCol={setHoverCol}
                               />
-                            ) : (
-                              priceRows.map((item, idx) => (
-                                <PriceRow
-                                  key={`${item.item_key}-${priceKind}`}
-                                  item={item}
-                                  columns={columns}
-                                  detailsByServiceId={detailsByServiceId}
-                                  stripe={idx % 2 === 1}
-                                  hoverCol={hoverCol}
-                                  onHoverCol={setHoverCol}
-                                />
-                              ))
-                            )}
-                          </>
+                            ))
+                          )
                         ) : featureRows.length === 0 ? (
                           <EmptyRow
                             colSpan={columns.length + 1}
@@ -312,18 +265,6 @@ export function DomainTopCompareTable({
               </table>
             </div>
           </div>
-
-          <div className="mt-4 flex justify-center sm:mt-5">
-            <Link
-              href={compareHref}
-              className={cn(
-                buttonClass("primary", "md"),
-                "min-h-11 min-w-[14rem] px-5 text-[13px] font-semibold",
-              )}
-            >
-              すべてのサービスを比較する
-            </Link>
-          </div>
         </div>
       )}
     </SectionShell>
@@ -397,40 +338,88 @@ function EmptyRow({
   );
 }
 
-function PriceRow({
-  item,
+function readNumericDetail(
+  details: DomainServiceDetails | null | undefined,
+  itemKey: string | undefined,
+): number | null {
+  if (!itemKey) return null;
+  const raw = getDomainDetailValue(details, itemKey);
+  if (typeof raw === "number") return Number.isNaN(raw) ? null : raw;
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isNaN(n) ? null : n;
+}
+
+function priceRankClass(rank: DomainPriceRank | undefined): string {
+  if (rank === 1) return "domain-price-rank-1";
+  if (rank === 2) return "domain-price-rank-2";
+  if (rank === 3) return "domain-price-rank-3";
+  return "";
+}
+
+const PRICE_LINES = [
+  { kind: "registration" as const, label: "取得" },
+  { kind: "renewal" as const, label: "更新" },
+  { kind: "transfer" as const, label: "移管" },
+];
+
+function PriceTldRow({
+  group,
   columns,
   detailsByServiceId,
   stripe,
   hoverCol,
   onHoverCol,
 }: {
-  item: DomainCompareItemView;
+  group: DomainPriceTldGroup;
   columns: EnrichedService[];
   detailsByServiceId: Record<string, DomainServiceDetails>;
   stripe: boolean;
   hoverCol: string | null;
   onHoverCol: (id: string | null) => void;
 }) {
-  const valuesByServiceId: Record<string, number | null> = {};
-  for (const col of columns) {
-    const raw = getDomainDetailValue(
-      detailsByServiceId[col.service.id],
-      item.item_key,
-    );
-    valuesByServiceId[col.service.id] =
-      typeof raw === "number" ? raw : raw == null ? null : Number(raw);
-    if (
-      valuesByServiceId[col.service.id] != null &&
-      Number.isNaN(valuesByServiceId[col.service.id] as number)
-    ) {
-      valuesByServiceId[col.service.id] = null;
-    }
-  }
+  // 取得／更新／移管は常に3行表示（未公開・未入力でも行は残す）
+  const priceLines = PRICE_LINES.map((line) => ({
+    ...line,
+    itemKey:
+      group[line.kind]?.item_key ?? `${group.tldPrefix}_${line.kind}`,
+  }));
 
-  const cheapest = item.highlight_best
-    ? findCheapestServiceIds(valuesByServiceId)
-    : new Set<string>();
+  const ranksByKind = {
+    registration: rankComparablePrices(
+      Object.fromEntries(
+        columns.map((col) => [
+          col.service.id,
+          readNumericDetail(
+            detailsByServiceId[col.service.id],
+            priceLines[0].itemKey,
+          ),
+        ]),
+      ),
+    ),
+    renewal: rankComparablePrices(
+      Object.fromEntries(
+        columns.map((col) => [
+          col.service.id,
+          readNumericDetail(
+            detailsByServiceId[col.service.id],
+            priceLines[1].itemKey,
+          ),
+        ]),
+      ),
+    ),
+    transfer: rankComparablePrices(
+      Object.fromEntries(
+        columns.map((col) => [
+          col.service.id,
+          readNumericDetail(
+            detailsByServiceId[col.service.id],
+            priceLines[2].itemKey,
+          ),
+        ]),
+      ),
+    ),
+  };
 
   const rowBg = stripe ? "domain-compare-row-alt" : "bg-white";
 
@@ -444,40 +433,75 @@ function PriceRow({
       <th
         scope="row"
         className={cn(
-          "compare-sticky-label border-r border-[var(--domain-compare-border)] px-2 py-2.5 text-[11px] font-semibold leading-snug text-[var(--text-primary)] sm:text-[12px]",
+          "compare-sticky-label border-r border-[var(--domain-compare-border)] px-2 py-2.5 text-left align-top sm:py-3",
           LABEL_W,
           stripe ? "domain-compare-label-alt" : "domain-compare-label",
         )}
       >
-        <span className="jp-keep">{item.tld_label ?? item.display_name}</span>
+        <span className="block text-[14px] font-extrabold leading-snug tracking-tight text-[var(--text-primary)] sm:text-[15px]">
+          <span className="jp-keep">{group.tldLabel}</span>
+        </span>
       </th>
       {columns.map((col) => {
-        const value = valuesByServiceId[col.service.id];
-        const isBest = cheapest.has(col.service.id);
+        const hasRank1 = priceLines.some(
+          (line) => ranksByKind[line.kind][col.service.id] === 1,
+        );
         return (
           <td
             key={col.service.id}
             className={cn(
-              "px-2 py-2.5 text-center align-middle transition-colors",
+              "px-2 py-2.5 text-left align-top transition-colors sm:py-3",
               SERVICE_W,
-              isBest && "domain-compare-best-cell",
-              hoverCol === col.service.id && !isBest && "compare-cell-hover",
+              hasRank1 && "domain-compare-best-cell",
+              hoverCol === col.service.id &&
+                !hasRank1 &&
+                "compare-cell-hover",
             )}
             onMouseEnter={() => onHoverCol(col.service.id)}
             onMouseLeave={() => onHoverCol(null)}
           >
-            <span
-              className={cn(
-                "inline-flex flex-wrap items-center justify-center gap-1 text-[13px] tabular-nums text-[var(--text-primary)] sm:text-[14px]",
-                isBest && "font-extrabold text-[var(--navy)]",
-                value == null && "text-[var(--text-muted)]",
-              )}
-            >
-              {formatDomainPrice(value)}
-              {isBest ? (
-                <span className="domain-compare-best-badge">最安</span>
-              ) : null}
-            </span>
+            <ul className="flex flex-col gap-1">
+              {priceLines.map((line) => {
+                const value = readNumericDetail(
+                  detailsByServiceId[col.service.id],
+                  line.itemKey,
+                );
+                const rank = ranksByKind[line.kind][col.service.id];
+                const isRenewal = line.kind === "renewal";
+                return (
+                  <li
+                    key={line.kind}
+                    className={cn(
+                      "grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-1.5 rounded-[0.375rem] px-1.5 py-1",
+                      priceRankClass(rank),
+                    )}
+                  >
+                    <span className="shrink-0 text-[10px] font-medium leading-none text-[var(--text-muted)] sm:text-[11px]">
+                      {line.label}
+                    </span>
+                    <span
+                      className={cn(
+                        "inline-flex min-w-0 flex-wrap items-baseline justify-end gap-1 text-right tabular-nums leading-snug",
+                        isRenewal
+                          ? "text-[13px] font-bold sm:text-[14px]"
+                          : "text-[12px] font-semibold sm:text-[13px]",
+                        value == null &&
+                          !rank &&
+                          "font-normal text-[var(--text-muted)]",
+                        rank != null && "font-bold",
+                      )}
+                    >
+                      {formatDomainPrice(value)}
+                      {rank === 1 ? (
+                        <span className="domain-compare-best-badge shrink-0 text-[10px]">
+                          ⭐ 最安
+                        </span>
+                      ) : null}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </td>
         );
       })}

@@ -46,15 +46,21 @@ function toRows(items: DomainComparisonItem[]): RowState[] {
 }
 
 type Props = {
+  dictionaryId: string;
   initialItems: DomainComparisonItem[];
 };
 
-export function DomainComparisonItemsEditor({ initialItems }: Props) {
+export function DomainComparisonItemsEditor({
+  dictionaryId,
+  initialItems,
+}: Props) {
   const [rows, setRows] = useState<RowState[]>(() => toRows(initialItems));
-  const [openGroups, setOpenGroups] = useState<Record<DomainComparisonGroupKey, boolean>>({
+  const [openGroups, setOpenGroups] = useState<
+    Record<DomainComparisonGroupKey, boolean>
+  >({
     price: true,
-    feature: false,
-    support: false,
+    feature: true,
+    support: true,
   });
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
     null,
@@ -68,7 +74,11 @@ export function DomainComparisonItemsEditor({ initialItems }: Props) {
         key,
         rows
           .filter((r) => r.group_key === key)
-          .sort((a, b) => a.sort_order - b.sort_order || a.item_key.localeCompare(b.item_key)),
+          .sort(
+            (a, b) =>
+              a.sort_order - b.sort_order ||
+              a.item_key.localeCompare(b.item_key),
+          ),
       );
     }
     return map;
@@ -115,7 +125,10 @@ export function DomainComparisonItemsEditor({ initialItems }: Props) {
         sort_order: r.sort_order,
         highlight_best: r.group_key === "price" ? r.highlight_best : false,
       }));
-      const result = await saveDomainComparisonItemsAction(payload);
+      const result = await saveDomainComparisonItemsAction(
+        dictionaryId,
+        payload,
+      );
       setMessage({ ok: result.ok, text: result.message });
     });
   }
@@ -125,7 +138,8 @@ export function DomainComparisonItemsEditor({ initialItems }: Props) {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">比較項目管理</h1>
         <p className="mt-1 text-sm text-slate-600">
-          ドメイン図鑑の比較表に出す項目・表示名・並び順を設定します（本サイト反映は別途）。
+          ドメイン図鑑TOP比較表の料金・機能・サポート項目の表示名・表示ON/OFF・並び順を設定します。
+          保存すると公開TOPへ反映されます（サーバー図鑑には影響しません）。
         </p>
       </div>
 
@@ -269,15 +283,15 @@ function ItemRow({
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:p-3.5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <label className="inline-flex shrink-0 items-center gap-2 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={item.is_visible}
-            onChange={(e) => onChange({ is_visible: e.target.checked })}
-            className="h-4 w-4 rounded border-slate-300"
-          />
-          表示
-        </label>
+          <label className="inline-flex shrink-0 items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={item.is_visible}
+              onChange={(e) => onChange({ is_visible: e.target.checked })}
+              className="h-4 w-4 rounded border-slate-300"
+            />
+            TOP表示
+          </label>
 
         <div className="min-w-0 flex-1">
           <label className="mb-1 block text-xs font-medium text-slate-500">

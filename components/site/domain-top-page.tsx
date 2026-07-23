@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PublicContentCard } from "@/lib/contents/types";
+import Image from "next/image";
 import {
   DOMAIN_BEGINNER_LINKS,
   DOMAIN_FAQS,
@@ -7,14 +7,15 @@ import {
 } from "@/lib/site/content";
 import {
   DOMAIN_BRAND,
-  DOMAIN_BRAND_SUB,
   DOMAIN_DESCRIPTION,
+  DOMAIN_LOGO_HEIGHT,
+  DOMAIN_LOGO_SRC,
+  DOMAIN_LOGO_WIDTH,
 } from "@/lib/site/domain-brand";
 import type { DomainTopData } from "@/lib/site/domain-public-data";
 import type { ManagedRankingSet } from "@/lib/site/rankings-public";
 import { getSiteUrl } from "@/lib/site/seo";
 import { categoryPath } from "@/lib/links";
-import { DomainCompareGroupCards } from "@/components/site/domain-compare-group-cards";
 import { DomainTopCompareTable } from "@/components/site/domain-top-compare-table";
 import { DomainRecommendedRanking } from "@/components/site/domain-recommended-ranking";
 import { DomainServiceCard } from "@/components/site/domain-service-card";
@@ -29,15 +30,10 @@ import {
 
 type Props = {
   data: DomainTopData;
-  latestContents?: PublicContentCard[];
   managedRankings?: Record<string, ManagedRankingSet>;
 };
 
-export function DomainTopPage({
-  data,
-  latestContents = [],
-  managedRankings = {},
-}: Props) {
+export function DomainTopPage({ data, managedRankings = {} }: Props) {
   const { category, services, allCount, comparisonItems, detailsByServiceId } =
     data;
   const categorySlug = category.slug;
@@ -46,10 +42,6 @@ export function DomainTopPage({
     categorySlug,
     serviceCount: allCount,
   });
-
-  const sectionNav = DOMAIN_PAGE_SECTION_NAV.filter(
-    (item) => item.href !== "#articles" || latestContents.length > 0,
-  );
 
   const beginnerLinks = DOMAIN_BEGINNER_LINKS.filter((l) => l.href);
 
@@ -70,32 +62,35 @@ export function DomainTopPage({
       {/* Hero */}
       <section className="hero-domain text-white">
         <div className="hero-domain-photo" aria-hidden />
-        <div className="hero-domain-content relative mx-auto flex min-h-[inherit] max-w-[90rem] items-center px-4 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-12">
+        <div className="hero-domain-content relative mx-auto flex min-h-[inherit] max-w-[90rem] items-center px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-7">
           <div className="hero-copy-local min-w-0 max-w-xl lg:pr-4">
-            <p className="inline-flex max-w-full items-center rounded-full bg-white/20 px-3.5 py-1.5 text-[12px] font-semibold leading-none tracking-tight text-white backdrop-blur-[2px] sm:px-4 sm:text-[13px]">
-              <span className="jp-keep">ドメイン会社をわかりやすく比較</span>
-            </p>
-            <h1 className="hero-title-shadow mt-3 text-[2rem] font-extrabold leading-[1.2] tracking-tight text-white sm:mt-3.5 sm:text-[2.5rem] sm:leading-[1.18] lg:text-[3rem]">
-              {DOMAIN_BRAND}
+            <Image
+              src={DOMAIN_LOGO_SRC}
+              alt={DOMAIN_BRAND}
+              width={DOMAIN_LOGO_WIDTH}
+              height={DOMAIN_LOGO_HEIGHT}
+              priority
+              sizes="(max-width: 640px) 220px, (max-width: 1024px) 280px, 320px"
+              className="h-auto w-[13.75rem] max-w-full object-contain object-left sm:w-[16.5rem] lg:w-[18rem]"
+            />
+            <h1 className="hero-title-shadow mt-2.5 text-[1.625rem] font-extrabold leading-[1.25] tracking-tight text-white sm:mt-3 sm:text-[2.125rem] sm:leading-[1.22] lg:text-[2.5rem]">
+              <span className="jp-keep">主要ドメインサービスをまとめて比較</span>
             </h1>
-            <p className="mt-1 text-[12px] font-medium text-white/80 sm:text-[13px]">
-              {DOMAIN_BRAND_SUB}
-            </p>
-            <p className="hero-desc-shadow mt-2.5 max-w-md text-[13px] leading-[1.7] text-white/92 text-pretty sm:mt-3 sm:text-[14px]">
-              取得・更新・移管料金や機能、サポートを比較。
+            <p className="hero-desc-shadow mt-2 max-w-md text-[13px] leading-[1.65] text-white/92 text-pretty sm:text-[14px]">
+              取得・更新・移管料金や機能、サポートを一覧で比較。
               <br className="hidden sm:block" />
-              あなたに合うドメインサービスが見つかります。
+              あなたに合うドメインサービスを見つけられます。
             </p>
-            <div className="mt-5 flex flex-col gap-2.5 sm:mt-6 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-3">
-              <Link
-                href={categoryPath(categorySlug, "compare")}
+            <div className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-3">
+              <a
+                href="#domain-compare-table"
                 className={cn(
                   buttonClass("primary", "md"),
                   "h-11 min-h-11 w-full justify-center border border-white/20 bg-[#067571] px-4 text-[13px] font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] hover:bg-[#056663] sm:w-auto sm:min-w-[11rem]",
                 )}
               >
                 <span className="jp-keep">サービスを比較する</span>
-              </Link>
+              </a>
               <a
                 href="#recommended-ranking"
                 className={cn(
@@ -116,7 +111,7 @@ export function DomainTopPage({
       >
         <div className="mx-auto max-w-[var(--container-max)] px-4 sm:px-6">
           <ul className="scroll-row flex justify-start gap-1.5 overflow-x-auto py-2 sm:flex-wrap sm:justify-center sm:overflow-visible">
-            {sectionNav.map((item) => (
+            {DOMAIN_PAGE_SECTION_NAV.map((item) => (
               <li key={item.href} className="shrink-0">
                 <a
                   href={item.href}
@@ -135,8 +130,6 @@ export function DomainTopPage({
         managedRankings={managedRankings}
       />
 
-      <DomainCompareGroupCards />
-
       <DomainTopCompareTable
         categorySlug={categorySlug}
         services={services}
@@ -148,19 +141,21 @@ export function DomainTopPage({
       <SectionShell
         id="all-services"
         tone="white"
-        className="!py-[calc(var(--section-py)*0.4)] sm:!py-[calc(var(--section-py-md)*0.4)]"
+        className="!py-0"
+        innerClassName="!py-5 sm:!py-6"
       >
         <SectionHeader
           title="サービス一覧"
-          description="管理画面で公開中のドメインサービスです。"
+          description="比較したあと、気になるサービスの詳細を確認できます。"
           emphasis
+          className="!mb-0"
         />
         {services.length === 0 ? (
-          <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center text-sm text-[var(--text-body)]">
+          <p className="mt-3 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center text-sm text-[var(--text-body)]">
             公開中のサービスはまだありません。管理画面でサービスを公開するとここに表示されます。
           </p>
         ) : (
-          <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-4 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-3.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
             {services.map((item) => (
               <li key={item.service.id}>
                 <DomainServiceCard item={item} categorySlug={categorySlug} />
@@ -168,7 +163,7 @@ export function DomainTopPage({
             ))}
           </ul>
         )}
-        <div className="mt-4 text-center sm:mt-5">
+        <div className="mt-3.5 text-center sm:mt-4">
           <SiteLinkButton
             href={categoryPath(categorySlug, "services")}
             variant="secondary"
@@ -180,71 +175,11 @@ export function DomainTopPage({
         </div>
       </SectionShell>
 
-      {latestContents.length > 0 ? (
-        <SectionShell id="articles" tone="gray">
-          <SectionHeader
-            title="お役立ち記事"
-            description="ドメイン選びに役立つ情報をまとめています。"
-          />
-          <ul className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-            {latestContents.map((item) => {
-              const updated = formatDate(item.updatedAt) ?? formatDate(item.publishedAt);
-              const readHref =
-                item.sourceUrl ||
-                (item.serviceSlug
-                  ? categoryPath(categorySlug, "services", item.serviceSlug)
-                  : null);
-              return (
-                <li
-                  key={item.id}
-                  className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-3.5 shadow-[var(--shadow-card)] sm:p-4"
-                >
-                  <p className="text-[11px] font-medium text-[var(--navy)]">
-                    {item.contentTypeLabel}
-                  </p>
-                  <h3 className="mt-1.5 text-[14px] font-bold leading-snug text-[var(--text-primary)] sm:text-[15px]">
-                    {item.title}
-                  </h3>
-                  {item.summary ? (
-                    <p className="mt-1.5 line-clamp-3 text-[12px] leading-relaxed text-[var(--text-body)]">
-                      {item.summary}
-                    </p>
-                  ) : null}
-                  {updated ? (
-                    <p className="mt-2 text-[11px] tabular-nums text-[var(--text-muted)]">
-                      更新日 {updated}
-                    </p>
-                  ) : null}
-                  {readHref ? (
-                    <div className="mt-auto pt-3">
-                      <a
-                        href={readHref}
-                        className={cn(
-                          buttonClass("secondary", "sm"),
-                          "min-h-11 w-full",
-                        )}
-                        {...(item.sourceUrl
-                          ? {
-                              target: "_blank",
-                              rel: "noopener noreferrer",
-                            }
-                          : {})}
-                      >
-                        記事を読む
-                      </a>
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </SectionShell>
-      ) : null}
-
       <SectionShell
         id="beginner"
-        tone={latestContents.length > 0 ? "white" : "gray"}
-        className="!py-[calc(var(--section-py)*0.4)] sm:!py-[calc(var(--section-py-md)*0.35)]"
+        tone="gray"
+        className="!py-0"
+        innerClassName="!py-5 sm:!py-6"
       >
         <SectionHeader
           title="ドメイン選びが初めての方へ"
@@ -252,7 +187,7 @@ export function DomainTopPage({
           className="!mb-0"
         />
         {beginnerLinks.length > 0 ? (
-          <ul className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2">
+          <ul className="mt-3 grid gap-2 sm:mt-3.5 sm:grid-cols-2">
             {beginnerLinks.map((link) => (
               <li key={link.articleSlug}>
                 <Link
@@ -265,7 +200,7 @@ export function DomainTopPage({
             ))}
           </ul>
         ) : (
-          <ul className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2">
+          <ul className="mt-3 grid gap-2 sm:mt-3.5 sm:grid-cols-2">
             {DOMAIN_BEGINNER_LINKS.map((link) => (
               <li key={link.articleSlug}>
                 <span
@@ -283,28 +218,23 @@ export function DomainTopPage({
 
       <SectionShell
         id="faq"
-        tone="gray"
-        className="!pb-[calc(var(--section-py)+4.5rem)] sm:!pb-[calc(var(--section-py-md)+3rem)]"
+        tone="white"
+        className="!py-0"
+        innerClassName="!pt-5 !pb-[calc(var(--section-py)+4.5rem)] sm:!pt-6 sm:!pb-[calc(var(--section-py-md)+3rem)]"
       >
         <div className="relative z-30 mx-auto max-w-3xl">
           <SectionHeader
             title="よくある質問"
             description="ドメイン選びに関するよくある疑問をまとめました。"
+            className="!mb-0"
           />
-          <div className="mt-4 sm:mt-5">
+          <div className="mt-3 sm:mt-3.5">
             <FaqAccordion items={DOMAIN_FAQS} />
           </div>
         </div>
       </SectionShell>
     </div>
   );
-}
-
-function formatDate(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 function buildDomainJsonLd({

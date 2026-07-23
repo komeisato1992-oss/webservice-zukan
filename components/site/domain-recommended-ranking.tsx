@@ -3,10 +3,8 @@ import { DomainRankingCard } from "@/components/site/domain-ranking-card";
 import {
   SectionHeader,
   SectionShell,
-  SiteLinkButton,
   cn,
 } from "@/components/site/ui";
-import { categoryPath } from "@/lib/links";
 
 type Props = {
   categorySlug: string;
@@ -37,7 +35,8 @@ export function DomainRecommendedRanking({
     <SectionShell
       id="recommended-ranking"
       tone="white"
-      className="!pt-[calc(var(--section-py)*0.45)] !pb-[calc(var(--section-py)*0.4)] sm:!pt-[calc(var(--section-py-md)*0.45)] sm:!pb-[calc(var(--section-py-md)*0.4)]"
+      className="!py-0"
+      innerClassName="!pt-4 !pb-3.5 sm:!pt-5 sm:!pb-5"
     >
       <SectionHeader
         title="人気ランキング"
@@ -46,16 +45,16 @@ export function DomainRecommendedRanking({
         className="!mb-0"
       />
 
-      <div className="mt-4 sm:mt-5">
+      <div className="mt-3 sm:mt-3.5">
         {items.length === 0 ? (
-          <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center text-sm text-[var(--text-body)]">
-            ランキングは準備中です。サービス一覧から各社の詳細を確認できます。
+          <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center text-sm text-[var(--text-body)]">
+            ランキングは準備中です。比較表から各社の違いを確認できます。
           </p>
         ) : (
           <>
             <ul
               className={cn(
-                "scroll-row flex gap-3 overflow-x-auto overscroll-x-contain pb-3",
+                "scroll-row flex gap-3 overflow-x-auto overscroll-x-contain pb-1.5",
                 "snap-x snap-mandatory touch-pan-x",
                 "pr-6 sm:pr-0",
                 "sm:grid sm:gap-4 sm:overflow-visible sm:pb-0 sm:snap-none",
@@ -80,16 +79,6 @@ export function DomainRecommendedRanking({
             </p>
           </>
         )}
-      </div>
-
-      <div className="mt-4 flex justify-center sm:mt-5">
-        <SiteLinkButton
-          href={categoryPath(categorySlug, "compare")}
-          variant="primary"
-          size="md"
-        >
-          サービスを比較する
-        </SiteLinkButton>
       </div>
     </SectionShell>
   );

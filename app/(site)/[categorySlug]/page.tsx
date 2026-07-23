@@ -139,21 +139,18 @@ export default async function CategoryHomePage({ params }: Props) {
   if (categorySlug === DOMAIN_CATEGORY_SLUG) {
     let data: DomainTopData | null = null;
     let failed = false;
-    let latestContents: Awaited<ReturnType<typeof loadPublishedContents>> = [];
     let managedRankings: Awaited<ReturnType<typeof loadPublishedRankings>> =
       new Map();
     try {
       const domainDictionaryId =
         await resolveDictionaryIdBySlug(DOMAIN_CATEGORY_SLUG);
-      const [topData, contents, rankings] = await Promise.all([
+      const [topData, rankings] = await Promise.all([
         loadDomainTopData(categorySlug),
-        loadPublishedContents(6),
         domainDictionaryId
           ? loadPublishedRankings(domainDictionaryId, "domain")
           : Promise.resolve(new Map()),
       ]);
       data = topData;
-      latestContents = contents;
       managedRankings = rankings;
     } catch (error) {
       failed = true;
@@ -166,12 +163,6 @@ export default async function CategoryHomePage({ params }: Props) {
       return <DataUnavailable />;
     }
 
-    const domainServiceIds = new Set(data.services.map((s) => s.service.id));
-    // ドメインサービスに紐付く記事のみ（0件ならセクション非表示）
-    const articles = latestContents.filter(
-      (c) => c.serviceId != null && domainServiceIds.has(c.serviceId),
-    );
-
     const rankings = filterRankingsByCategoryId(
       managedRankings,
       data.category.id,
@@ -180,7 +171,6 @@ export default async function CategoryHomePage({ params }: Props) {
     return (
       <DomainTopPage
         data={data}
-        latestContents={articles}
         managedRankings={rankings}
       />
     );
