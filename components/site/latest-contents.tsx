@@ -94,6 +94,11 @@ export function LatestContents({ items, categorySlug }: Props) {
                   size="sm"
                   fullWidth={false}
                   className="min-w-[5.25rem] px-2"
+                  analytics={{
+                    service_name: item.serviceName ?? item.title,
+                    page_type: "top",
+                    button_location: "latest_contents",
+                  }}
                 />
               ) : null}
             </div>

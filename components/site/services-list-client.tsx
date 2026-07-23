@@ -113,6 +113,8 @@ export function ServicesListClient({
                   featureTags={rec.item.highlightLabels}
                   rank={index + 1}
                   featured
+                  pageType="top"
+                  buttonLocation="service_card"
                 />
               </li>
             ))}
@@ -136,6 +138,8 @@ export function ServicesListClient({
             affiliateLinks={item.affiliateLinks}
             representativePlan={item.representativePlan}
             featureTags={item.highlightLabels}
+            pageType="top"
+            buttonLocation="service_card"
           />
         ))}
       </div>

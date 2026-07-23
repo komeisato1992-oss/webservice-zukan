@@ -341,6 +341,11 @@ export default async function ServiceDetailPage({ params }: Props) {
                   size="md"
                   fullWidth={false}
                   className="min-w-[10rem]"
+                  analytics={{
+                    service_name: service.name,
+                    page_type: "service_detail",
+                    button_location: "hero",
+                  }}
                 />
               ) : null}
               <Link

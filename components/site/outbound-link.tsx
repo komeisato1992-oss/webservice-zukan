@@ -6,6 +6,7 @@ type Props = {
   children: React.ReactNode;
   className?: string;
   "aria-label"?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 };
 
 /** 公式/アフィリエイト外部リンクを安全に出力 */
@@ -15,6 +16,7 @@ export function OutboundLink({
   children,
   className,
   "aria-label": ariaLabel,
+  onClick,
 }: Props) {
   return (
     <a
@@ -23,6 +25,7 @@ export function OutboundLink({
       rel={outboundRel(isAffiliate)}
       className={className}
       aria-label={ariaLabel}
+      onClick={onClick}
     >
       {children}
     </a>

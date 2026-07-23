@@ -418,6 +418,12 @@ export function ComparisonTable({
                           label="公式サイト"
                           size="sm"
                           className="!h-8 !min-h-8 !px-1 !text-[10px] sm:!h-11 sm:!min-h-11 sm:!px-2.5 sm:!text-[12px]"
+                          analytics={{
+                            service_name: item.service.name,
+                            page_type:
+                              variant === "top" ? "top" : "compare",
+                            button_location: "compare_table",
+                          }}
                         />
                       ) : (
                         <span className="text-[var(--text-muted)]">-</span>

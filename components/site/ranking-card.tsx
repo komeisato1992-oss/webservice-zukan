@@ -57,6 +57,8 @@ export function RankingStarRow({ rating }: { rating: number | null }) {
 type Props = {
   card: ManagedRankingCard;
   categorySlug: string;
+  /** GA4 affiliate_click の button_location */
+  buttonLocation: string;
   className?: string;
 };
 
@@ -64,7 +66,12 @@ type Props = {
  * おすすめランキング / 条件別ランキング共通カード。
  * 右側の表示項目は purposeId に応じて切り替わる（複製しない）。
  */
-export function RankingCard({ card, categorySlug, className }: Props) {
+export function RankingCard({
+  card,
+  categorySlug,
+  buttonLocation,
+  className,
+}: Props) {
   const detailHref = categoryPath(
     categorySlug,
     "services",
@@ -142,6 +149,13 @@ export function RankingCard({ card, categorySlug, className }: Props) {
             isAffiliate={outbound.isAffiliate}
             label="公式サイトを見る"
             size="sm"
+            analytics={{
+              service_name: card.service.name,
+              page_type: "top",
+              button_location: buttonLocation,
+              ranking_type: card.purposeId,
+              position: card.rank,
+            }}
           />
         ) : (
           <span

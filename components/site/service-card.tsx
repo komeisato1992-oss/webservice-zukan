@@ -19,6 +19,10 @@ type Props = {
   className?: string;
   rank?: number | null;
   featured?: boolean;
+  /** GA4 affiliate_click の page_type */
+  pageType?: string;
+  /** GA4 affiliate_click の button_location */
+  buttonLocation?: string;
 };
 
 function priceLabel(plan: ServicePlan | null | undefined): string | null {
@@ -41,6 +45,8 @@ export function ServiceCard({
   className = "",
   rank = null,
   featured = false,
+  pageType = "services",
+  buttonLocation = "service_card",
 }: Props) {
   const detailHref = categoryPath(categorySlug, "services", service.slug);
   const outbound =
@@ -180,6 +186,12 @@ export function ServiceCard({
               size="sm"
               fullWidth={false}
               className="min-w-[5.25rem] px-2"
+              analytics={{
+                service_name: service.name,
+                page_type: pageType,
+                button_location: buttonLocation,
+                ...(rank != null ? { position: rank } : {}),
+              }}
             />
           ) : null}
         </div>

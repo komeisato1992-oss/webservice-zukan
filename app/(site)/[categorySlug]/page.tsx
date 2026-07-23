@@ -184,6 +184,8 @@ export default async function CategoryHomePage({ params }: Props) {
               service as Service,
               (service.affiliate_links as AffiliateLink[]) ?? [],
             )}
+            pageType="top"
+            buttonLocation="service_card"
           />
         ))}
       </div>

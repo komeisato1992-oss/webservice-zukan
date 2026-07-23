@@ -154,6 +154,8 @@ export default async function CategoryServicesPage({ params }: Props) {
                 service={service as Service}
                 categorySlug={category.slug}
                 affiliateLinks={links}
+                pageType="services"
+                buttonLocation="service_card"
               />
             );
           })}

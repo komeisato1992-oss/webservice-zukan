@@ -159,7 +159,11 @@ export function PurposePicker({
                   key={`${card.purposeId}-${card.rank}-${card.service.id}`}
                   className="snap-start sm:min-w-0"
                 >
-                  <RankingCard card={card} categorySlug={categorySlug} />
+                  <RankingCard
+                    card={card}
+                    categorySlug={categorySlug}
+                    buttonLocation="purpose_ranking"
+                  />
                 </li>
               ))}
             </ul>
