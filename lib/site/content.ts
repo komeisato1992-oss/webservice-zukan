@@ -103,6 +103,54 @@ export const RANKING_PURPOSE_OPTIONS: PurposeOption[] = (() => {
   ];
 })();
 
+/** ドメイン図鑑ランキング管理用（サーバー専用カテゴリは含めない） */
+export const DOMAIN_RANKING_PURPOSE_OPTIONS: PurposeOption[] = [
+  {
+    id: "overall",
+    label: "総合おすすめ",
+    sectionId: "purpose-overall",
+    keywords: ["総合", "おすすめ"],
+    description: "編集部の総合おすすめ",
+  },
+  {
+    id: "cheap_registration",
+    label: "取得料金が安い",
+    sectionId: "purpose-cheap-registration",
+    keywords: ["取得", "安い", "新規"],
+    description: "取得料金を重視",
+  },
+  {
+    id: "cheap_renewal",
+    label: "更新料金が安い",
+    sectionId: "purpose-cheap-renewal",
+    keywords: ["更新", "安い", "継続"],
+    description: "更新料金を重視",
+  },
+  {
+    id: "beginner",
+    label: "初心者向け",
+    sectionId: "purpose-beginner",
+    keywords: ["初心者", "初めて", "かんたん", "簡単", "入門"],
+    description: "初めてでも安心",
+  },
+  {
+    id: "business",
+    label: "法人向け",
+    sectionId: "purpose-business",
+    keywords: ["法人", "ビジネス", "企業", "会社"],
+    description: "法人・ビジネス向け",
+  },
+];
+
+/** 下書き正規化用: サーバー＋ドメインの全 purpose を保持 */
+export const ALL_RANKING_PURPOSE_OPTIONS: PurposeOption[] = (() => {
+  const map = new Map<string, PurposeOption>();
+  for (const o of [...RANKING_PURPOSE_OPTIONS, ...DOMAIN_RANKING_PURPOSE_OPTIONS]) {
+    if (!map.has(o.id)) map.set(o.id, o);
+  }
+  return [...map.values()];
+})();
+
 /** TOP「おすすめランキング」の初期3タブ（管理画面カテゴリと連動） */
 export const TOP_RANKING_TABS = [
   { purposeId: "overall", label: "総合おすすめ" },
@@ -175,6 +223,93 @@ export type FaqItem = {
   question: string;
   answer: string;
 };
+
+/** ドメイン図鑑 TOP「比較で選ぶ」カード */
+export const DOMAIN_COMPARE_GROUP_CARDS = [
+  {
+    group: "price",
+    title: "料金で比較する",
+    description: "取得・更新・移管料金を比較",
+    href: "/domain/compare?group=price",
+  },
+  {
+    group: "feature",
+    title: "機能で比較する",
+    description: "Whois代理公開・DNS・DNSSECなどを比較",
+    href: "/domain/compare?group=feature",
+  },
+  {
+    group: "support",
+    title: "サポートで比較する",
+    description: "電話・メール・チャット対応を比較",
+    href: "/domain/compare?group=support",
+  },
+] as const;
+
+/**
+ * 初心者向け案内。href が null の項目は本番でリンク化しない
+ *（記事公開後に slug / path を接続する）。
+ */
+export const DOMAIN_BEGINNER_LINKS: Array<{
+  label: string;
+  articleSlug: string;
+  href: string | null;
+}> = [
+  { label: "ドメインとは？", articleSlug: "what-is-domain", href: null },
+  {
+    label: ".comと.jpの違い",
+    articleSlug: "com-vs-jp",
+    href: null,
+  },
+  {
+    label: "ドメイン取得の流れ",
+    articleSlug: "how-to-register-domain",
+    href: null,
+  },
+  {
+    label: "Whois代理公開とは？",
+    articleSlug: "what-is-whois-privacy",
+    href: null,
+  },
+];
+
+export const DOMAIN_FAQS: FaqItem[] = [
+  {
+    question: "ドメインの取得料金と更新料金は違いますか？",
+    answer:
+      "多くのドメインサービスでは、初回の取得料金と2年目以降の更新料金が異なります。取得時はキャンペーンで安くても、更新料金が高い場合があるため、比較するときは両方を確認しましょう。",
+  },
+  {
+    question: ".comと.jpはどちらを選ぶべきですか？",
+    answer:
+      ".comは世界で広く使われる汎用ドメイン、.jpは日本向けの国別ドメインです。国内向けサイトや信頼性を重視するなら.jp、海外展開や一般的なWebサービスなら.comが選ばれることが多いです。用途と予算に合わせて比較してください。",
+  },
+  {
+    question: "Whois代理公開とは何ですか？",
+    answer:
+      "ドメイン登録者の氏名・住所・メールアドレスなどのWhois情報を、事業者の情報で代理公開するサービスです。個人情報の露出を抑えたい場合に有用です。無料のサービスと有料オプションがあるため、各社の対応を比較表で確認できます。",
+  },
+  {
+    question: "ドメイン移管とは何ですか？",
+    answer:
+      "すでに取得しているドメインの管理会社を、別のドメインサービスへ移す手続きです。移管手数料やAuthCode（認証コード）、移管後の更新料金を確認したうえで検討しましょう。",
+  },
+  {
+    question: "サーバーとドメインは同じ会社で契約すべきですか？",
+    answer:
+      "同じ会社だと管理画面がまとまりやすく初心者には便利な一方、料金や機能で最適な組み合わせはケースによります。ドメインとサーバーを別会社で契約することも一般的です。用途に合わせて比較してください。",
+  },
+];
+
+export const DOMAIN_PAGE_SECTION_NAV = [
+  { href: "#recommended-ranking", label: "人気ランキング" },
+  { href: "#compare-groups", label: "比較で選ぶ" },
+  { href: "#domain-compare-table", label: "比較表" },
+  { href: "#all-services", label: "サービス一覧" },
+  { href: "#articles", label: "お役立ち記事" },
+  { href: "#beginner", label: "初心者向け" },
+  { href: "#faq", label: "FAQ" },
+] as const;
 
 export const SERVER_FAQS: FaqItem[] = [
   {

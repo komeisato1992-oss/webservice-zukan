@@ -46,6 +46,7 @@ type Props = {
   draft: CmsServiceDraft;
   comparisonFields: ComparisonField[];
   candidates: ScrapingCandidate[];
+  dictionarySlug: string;
 };
 
 type Row = Record<string, unknown>;
@@ -194,6 +195,7 @@ export function ServiceCmsEditor({
   draft,
   comparisonFields,
   candidates,
+  dictionarySlug,
 }: Props) {
   const router = useRouter();
   const [payload, setPayload] = useState<ServiceDraftPayload>(() => clonePayload(draft.payload));
@@ -429,7 +431,7 @@ export function ServiceCmsEditor({
       <div className="sticky top-0 z-20 -mx-4 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
         <div className="flex items-center gap-3">
           <Link
-            href="/admin/services"
+            href={`/admin/${dictionarySlug}/services`}
             className="shrink-0 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600"
           >
             ← 一覧
@@ -661,10 +663,12 @@ function UrlField({
   label,
   value,
   onChange,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  hint?: string;
 }) {
   const href = value ? safeExternalHref(value) : null;
   return (
@@ -672,7 +676,8 @@ function UrlField({
       <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
       <div className="flex gap-2">
         <input
-          type="text"
+          type="url"
+          inputMode="url"
           value={value}
           placeholder="https://..."
           onChange={(e) => onChange(e.target.value)}
@@ -692,6 +697,7 @@ function UrlField({
           ↗
         </a>
       </div>
+      {hint ? <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{hint}</p> : null}
     </div>
   );
 }
@@ -759,6 +765,7 @@ function BasicSection({
               label="アフィリエイトURL"
               value={String(serviceRow.affiliate_url ?? "")}
               onChange={(v) => onChange("affiliate_url", v)}
+              hint="入力されている場合、本サイトの公式サイトボタンにはアフィリエイトURLが優先して使用されます。"
             />
           </div>
           <div>

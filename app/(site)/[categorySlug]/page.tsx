@@ -6,14 +6,27 @@ import { categoryPath, isReservedPathSegment, resolveOutboundUrl } from "@/lib/l
 import { createPublicClient } from "@/lib/supabase/public";
 import { ServiceCard } from "@/components/site/service-card";
 import { ServerTopPage } from "@/components/site/server-top-page";
+import { DomainTopPage } from "@/components/site/domain-top-page";
 import { PRIMARY_CATEGORY_SLUG, SITE_BRAND } from "@/lib/site/brand";
+import {
+  DOMAIN_BRAND,
+  DOMAIN_CATEGORY_SLUG,
+} from "@/lib/site/domain-brand";
 import { buildPageMetadata } from "@/lib/site/seo";
 import {
   loadServerTopData,
   type ServerTopData,
 } from "@/lib/site/public-data";
+import {
+  loadDomainTopData,
+  type DomainTopData,
+} from "@/lib/site/domain-public-data";
 import { loadPublishedContents } from "@/lib/contents/public";
-import { loadPublishedRankings } from "@/lib/site/rankings-public";
+import {
+  filterRankingsByCategoryId,
+  loadPublishedRankings,
+} from "@/lib/site/rankings-public";
+import { resolveDictionaryIdBySlug } from "@/lib/site/dictionary";
 import { DataUnavailable } from "@/components/site/data-unavailable";
 import type { AffiliateLink, Category, Service } from "@/lib/types/database";
 
@@ -30,6 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (categorySlug === PRIMARY_CATEGORY_SLUG) {
     return buildPageMetadata("server", { absoluteTitle: true });
+  }
+
+  if (categorySlug === DOMAIN_CATEGORY_SLUG) {
+    return buildPageMetadata("domain", {
+      absoluteTitle: true,
+      siteName: DOMAIN_BRAND,
+    });
   }
 
   const supabase = createPublicClient();
@@ -60,11 +80,18 @@ export default async function CategoryHomePage({ params }: Props) {
     let managedRankings: Awaited<ReturnType<typeof loadPublishedRankings>> =
       new Map();
     try {
-      [data, latestContents, managedRankings] = await Promise.all([
+      const serverDictionaryId =
+        await resolveDictionaryIdBySlug(PRIMARY_CATEGORY_SLUG);
+      const [topData, contents, rankings] = await Promise.all([
         loadServerTopData(categorySlug),
         loadPublishedContents(3),
-        loadPublishedRankings(),
+        serverDictionaryId
+          ? loadPublishedRankings(serverDictionaryId, "server")
+          : Promise.resolve(new Map()),
       ]);
+      data = topData;
+      latestContents = contents;
+      managedRankings = rankings;
     } catch (error) {
       failed = true;
       const err = error as {
@@ -96,11 +123,65 @@ export default async function CategoryHomePage({ params }: Props) {
       }
       return <DataUnavailable />;
     }
+    const rankings = filterRankingsByCategoryId(
+      managedRankings,
+      data.category.id,
+    );
     return (
       <ServerTopPage
         data={data}
         latestContents={latestContents}
-        managedRankings={Object.fromEntries(managedRankings)}
+        managedRankings={rankings}
+      />
+    );
+  }
+
+  if (categorySlug === DOMAIN_CATEGORY_SLUG) {
+    let data: DomainTopData | null = null;
+    let failed = false;
+    let latestContents: Awaited<ReturnType<typeof loadPublishedContents>> = [];
+    let managedRankings: Awaited<ReturnType<typeof loadPublishedRankings>> =
+      new Map();
+    try {
+      const domainDictionaryId =
+        await resolveDictionaryIdBySlug(DOMAIN_CATEGORY_SLUG);
+      const [topData, contents, rankings] = await Promise.all([
+        loadDomainTopData(categorySlug),
+        loadPublishedContents(6),
+        domainDictionaryId
+          ? loadPublishedRankings(domainDictionaryId, "domain")
+          : Promise.resolve(new Map()),
+      ]);
+      data = topData;
+      latestContents = contents;
+      managedRankings = rankings;
+    } catch (error) {
+      failed = true;
+      console.error("[domain-top] page load failed", {
+        categorySlug,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+    if (failed || !data) {
+      return <DataUnavailable />;
+    }
+
+    const domainServiceIds = new Set(data.services.map((s) => s.service.id));
+    // ドメインサービスに紐付く記事のみ（0件ならセクション非表示）
+    const articles = latestContents.filter(
+      (c) => c.serviceId != null && domainServiceIds.has(c.serviceId),
+    );
+
+    const rankings = filterRankingsByCategoryId(
+      managedRankings,
+      data.category.id,
+    );
+
+    return (
+      <DomainTopPage
+        data={data}
+        latestContents={articles}
+        managedRankings={rankings}
       />
     );
   }

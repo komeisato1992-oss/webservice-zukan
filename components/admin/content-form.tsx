@@ -52,7 +52,7 @@ export function ContentForm({ content, services }: Props) {
       }
       setMessage(result.message);
       if (!content && result.id) {
-        router.push(`/admin/contents/${result.id}`);
+        router.push(`/admin/server/contents/${result.id}`);
         return;
       }
       router.refresh();
@@ -72,7 +72,7 @@ export function ContentForm({ content, services }: Props) {
         setError(result.message);
         return;
       }
-      router.push("/admin/contents");
+      router.push("/admin/server/contents");
       router.refresh();
     });
   }

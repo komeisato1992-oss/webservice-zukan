@@ -562,3 +562,210 @@ a[class*="button"],
 .value-chip-on-dark {
   color: rgba(255, 255, 255, 0.88);
 }
+
+/* -------------------------------------------------------------------------
+ * Domain dictionary theme (scoped — does not change server navy defaults)
+ * ------------------------------------------------------------------------- */
+[data-site-theme="domain"] {
+  --navy: #078f8a;
+  --navy-deep: #067571;
+  --navy-light: #08b8b0;
+  --accent: #08b8b0;
+  --accent-hover: #078f8a;
+  --accent-soft: #e7faf8;
+  --brand: #08b8b0;
+  --brand-hover: #078f8a;
+  --brand-deep: #067571;
+  --brand-soft: #e7faf8;
+  --surface: #f5fcfb;
+  --surface-blue: #e7faf8;
+  --surface-muted: #f7fcfb;
+  --surface-tint: #e7faf8;
+  --surface-navy-tint: #d5f5f2;
+  --border: #beedea;
+  --border-subtle: #d8f5f2;
+  --text-primary: #12333a;
+  --text-body: #3d5c63;
+  --text-muted: #6b858c;
+  --compare-header-bg: #067571;
+  --compare-label-bg: #e7faf8;
+  --compare-hover: rgba(8, 184, 176, 0.08);
+  --shadow-card: 0 1px 2px rgba(8, 143, 138, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(8, 143, 138, 0.08);
+  --shadow-featured: 0 2px 8px rgba(8, 143, 138, 0.08);
+}
+
+.site-header-domain {
+  background: rgba(6, 117, 113, 0.94);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.hero-domain {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  background-color: #078f8a;
+}
+
+@media (min-width: 768px) {
+  .hero-domain {
+    min-height: 420px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-domain {
+    min-height: 460px;
+  }
+}
+
+.hero-domain-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: #078f8a;
+  background-image: url("/images/domain/domain-hero.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+
+@media (max-width: 767px) {
+  .hero-domain-photo {
+    /* Keep globe / domain spheres visible on the right */
+    background-position: 72% center;
+  }
+
+  .hero-domain-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      rgba(6, 117, 113, 0.72) 0%,
+      rgba(6, 117, 113, 0.45) 42%,
+      rgba(6, 117, 113, 0.12) 72%,
+      transparent 100%
+    );
+  }
+}
+
+.hero-domain-content {
+  position: relative;
+  z-index: 1;
+}
+
+.site-footer-domain {
+  background-color: #056663;
+}
+
+.site-footer-domain-bg {
+  background-color: #056663;
+  background-image: url("/images/domain/domain-hero.jpeg");
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: saturate(0.9) brightness(0.55);
+}
+
+.site-footer-domain-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(5, 102, 99, 0.55) 0%,
+    rgba(5, 102, 99, 0.75) 45%,
+    rgba(5, 102, 99, 0.92) 100%
+  );
+}
+
+[data-site-theme="domain"] .scroll-row {
+  scrollbar-color: #9ad9d4 transparent;
+}
+[data-site-theme="domain"] .scroll-row::-webkit-scrollbar-thumb {
+  background: #9ad9d4;
+}
+
+/* Domain TOP compare table — sticky + emerald visibility */
+.domain-compare-table {
+  --domain-compare-border: #9ad9d4;
+  --domain-compare-row-alt: #f3fbfa;
+  --domain-compare-best: #dff7f4;
+  --domain-compare-accordion: #067571;
+  --domain-compare-accordion-hover: #056663;
+}
+
+.domain-compare-table .comparison-table-shell {
+  border-color: var(--domain-compare-border);
+}
+
+.domain-compare-table .domain-compare-row-alt {
+  background-color: var(--domain-compare-row-alt);
+}
+
+.domain-compare-table .domain-compare-label {
+  background-color: var(--compare-label-bg);
+}
+
+.domain-compare-table .domain-compare-label-alt {
+  background-color: #dff3f0;
+}
+
+.domain-compare-table .domain-compare-best-cell {
+  background-color: var(--domain-compare-best) !important;
+}
+
+.domain-compare-table .domain-compare-best-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(6, 117, 113, 0.12);
+  padding: 0.1rem 0.4rem;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.domain-compare-table .domain-compare-accordion-btn {
+  background-color: var(--domain-compare-accordion);
+}
+
+.domain-compare-table .domain-compare-accordion-btn:hover {
+  background-color: var(--domain-compare-accordion-hover);
+}
+
+.domain-compare-table .compare-sticky-label.compare-cell-hover,
+.domain-compare-table .domain-compare-label.compare-cell-hover,
+.domain-compare-table .domain-compare-label-alt.compare-cell-hover {
+  background-color: #cfece8 !important;
+}
+
+.domain-compare-table .compare-cell-hover {
+  background-color: rgba(8, 184, 176, 0.08) !important;
+}
+
+/* Domain compare table — primary official CTA */
+.domain-compare-table .domain-compare-official-cta {
+  background-color: #087f78 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 3px 8px rgba(6, 106, 101, 0.22) !important;
+  white-space: nowrap;
+}
+
+.domain-compare-table .domain-compare-official-cta:hover {
+  background-color: #066a65 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(6, 106, 101, 0.28) !important;
+}
+
+.domain-compare-table .domain-compare-official-cta:active {
+  transform: translateY(0);
+}
+
+.domain-compare-table .domain-compare-official-cta:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px rgba(8, 127, 120, 0.55),
+    0 3px 8px rgba(6, 106, 101, 0.22) !important;
+}

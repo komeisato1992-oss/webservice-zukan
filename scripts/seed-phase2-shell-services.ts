@@ -50,6 +50,16 @@ async function main() {
     throw new Error("カテゴリ server が見つかりません");
   }
 
+  const { data: dictionary, error: dictionaryError } = await supabase
+    .from("dictionaries")
+    .select("id")
+    .eq("slug", "server")
+    .maybeSingle();
+
+  if (dictionaryError || !dictionary) {
+    throw new Error("図鑑 server が見つかりません");
+  }
+
   for (const shell of PHASE2_SHELL_SERVICES.filter(
     (s) => s.slug === "xserver" || s.slug === "conoha-wing",
   )) {
@@ -90,6 +100,7 @@ async function main() {
 
   const rows = toInsert.map((s) => ({
     category_id: category.id,
+    dictionary_id: dictionary.id,
     name: s.name,
     slug: s.slug,
     official_url: s.officialUrl,

@@ -132,7 +132,7 @@ export async function saveCategoryAction(
     }
   }
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   revalidatePath(`/${parsed.data.slug}`);
@@ -167,7 +167,7 @@ export async function deleteCategoryAction(formData: FormData): Promise<ActionRe
     return { ok: false, message: error.message };
   }
 
-  revalidatePath("/admin/categories");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   return { ok: true, message: "カテゴリを削除しました。" };
@@ -234,9 +234,18 @@ export async function saveServiceAction(
     };
   }
 
+  const dictionaryId = formString(formData, "dictionary_id");
+  const dictionarySlug =
+    formString(formData, "dictionary_slug") || "server";
+
+  if (!id && !dictionaryId) {
+    return { ok: false, message: "図鑑が指定されていません。" };
+  }
+
   const servicePayload = {
     ...parsed.data,
     primary_link_url: parsed.data.affiliate_url,
+    ...(dictionaryId ? { dictionary_id: dictionaryId } : {}),
   };
 
   let serviceId = id;
@@ -252,7 +261,10 @@ export async function saveServiceAction(
   } else {
     const { data, error } = await supabase
       .from("services")
-      .insert(servicePayload)
+      .insert({
+        ...servicePayload,
+        dictionary_id: dictionaryId,
+      })
       .select("id")
       .single();
     if (error || !data) {
@@ -309,7 +321,7 @@ export async function saveServiceAction(
     .eq("id", parsed.data.category_id)
     .maybeSingle();
 
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   if (category?.slug) {
@@ -319,7 +331,9 @@ export async function saveServiceAction(
   }
 
   if (!id && serviceId) {
-    redirect(`/admin/services/${serviceId}?saved=1&tab=scrape`);
+    redirect(
+      `/admin/${dictionarySlug}/services/${serviceId}?saved=1&tab=scrape`,
+    );
   }
 
   return { ok: true, message: "サービスを保存しました。" };
@@ -338,7 +352,7 @@ export async function deleteServiceAction(formData: FormData): Promise<ActionRes
 
   const { data: service } = await supabase
     .from("services")
-    .select("slug, category_id")
+    .select("slug, category_id, dictionary_id")
     .eq("id", id)
     .maybeSingle();
 
@@ -357,7 +371,17 @@ export async function deleteServiceAction(formData: FormData): Promise<ActionRes
     categorySlug = category?.slug;
   }
 
-  revalidatePath("/admin/services");
+  let dictionarySlug = "server";
+  if (service?.dictionary_id) {
+    const { data: dictionary } = await supabase
+      .from("dictionaries")
+      .select("slug")
+      .eq("id", service.dictionary_id)
+      .maybeSingle();
+    if (dictionary?.slug) dictionarySlug = dictionary.slug;
+  }
+
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   if (categorySlug && service?.slug) {
@@ -365,7 +389,7 @@ export async function deleteServiceAction(formData: FormData): Promise<ActionRes
     revalidatePath(`/${categorySlug}/services/${service.slug}`);
   }
 
-  redirect("/admin/services");
+  redirect(`/admin/${dictionarySlug}/services`);
 }
 
 export async function toggleServicePublishAction(
@@ -447,7 +471,7 @@ export async function toggleServicePublishAction(
     .eq("id", current.category_id)
     .maybeSingle();
 
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   if (category?.slug) {
@@ -613,7 +637,7 @@ export async function saveTopPlacementAction(
     }
   }
 
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   revalidatePath("/server");
@@ -662,10 +686,24 @@ export async function duplicateServiceAction(formData: FormData) {
   };
   const links = sourceRecord.affiliate_links ?? [];
 
+  let dictionaryId = source.dictionary_id;
+  if (!dictionaryId) {
+    const { data: serverDictionary } = await supabase
+      .from("dictionaries")
+      .select("id")
+      .eq("slug", "server")
+      .maybeSingle();
+    dictionaryId = serverDictionary?.id;
+  }
+  if (!dictionaryId) {
+    return;
+  }
+
   const { data: created, error: insertError } = await supabase
     .from("services")
     .insert({
       category_id: source.category_id,
+      dictionary_id: dictionaryId,
       name: `${source.name}（コピー）`,
       slug,
       short_name: source.short_name,
@@ -709,8 +747,18 @@ export async function duplicateServiceAction(formData: FormData) {
     });
   }
 
-  revalidatePath("/admin/services");
-  redirect(`/admin/services/${created.id}`);
+  let dictionarySlug = "server";
+  if (source.dictionary_id) {
+    const { data: dictionary } = await supabase
+      .from("dictionaries")
+      .select("slug")
+      .eq("id", source.dictionary_id)
+      .maybeSingle();
+    if (dictionary?.slug) dictionarySlug = dictionary.slug;
+  }
+
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/${dictionarySlug}/services/${created.id}`);
 }
 
 /** Phase2: 残り18社のサービス器を一括登録（プラン・比較値は作らない） */
@@ -731,6 +779,16 @@ export async function seedPhase2ShellServicesAction(): Promise<ActionResult> {
 
   if (categoryError || !category) {
     return { ok: false, message: "カテゴリ「server」が見つかりません。" };
+  }
+
+  const { data: dictionary, error: dictionaryError } = await supabase
+    .from("dictionaries")
+    .select("id")
+    .eq("slug", "server")
+    .maybeSingle();
+
+  if (dictionaryError || !dictionary) {
+    return { ok: false, message: "図鑑「server」が見つかりません。" };
   }
 
   // 既存2社の表示順を整える
@@ -755,7 +813,7 @@ export async function seedPhase2ShellServicesAction(): Promise<ActionResult> {
   );
 
   if (toInsert.length === 0) {
-    revalidatePath("/admin/services");
+    revalidatePath("/admin", "layout");
     revalidatePath("/server/services");
     revalidatePublicSiteCache();
     return {
@@ -766,6 +824,7 @@ export async function seedPhase2ShellServicesAction(): Promise<ActionResult> {
 
   const rows = toInsert.map((s) => ({
     category_id: category.id,
+    dictionary_id: dictionary.id,
     name: s.name,
     slug: s.slug,
     official_url: s.officialUrl,
@@ -780,7 +839,7 @@ export async function seedPhase2ShellServicesAction(): Promise<ActionResult> {
     return { ok: false, message: error.message };
   }
 
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   revalidatePath("/server");

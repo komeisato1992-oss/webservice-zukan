@@ -57,8 +57,8 @@ async function revalidateTouchedServices(serviceIds: string[]) {
   const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
-  revalidatePath("/admin/spreadsheet");
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePath("/server");
   revalidatePath("/server/services");
@@ -72,7 +72,7 @@ async function revalidateTouchedServices(serviceIds: string[]) {
       .eq("id", id)
       .maybeSingle();
     if (!service) continue;
-    revalidatePath(`/admin/services/${id}`);
+    revalidatePath("/admin", "layout");
     revalidatePath(`/server/services/${service.slug}`);
     const { data: category } = await supabase
       .from("categories")
@@ -373,7 +373,7 @@ export async function exportToGoogleSheetsAction(): Promise<
       completed_at: new Date().toISOString(),
     });
 
-    revalidatePath("/admin/spreadsheet");
+    revalidatePath("/admin", "layout");
     return {
       ok: true,
       message: "最新データをスプレッドシートへ書き出しました",
@@ -451,10 +451,19 @@ export async function importFromGoogleSheetsAction(): Promise<
       if (id) planIdByKey.set(id, id);
       if (serviceId && name) planIdByKey.set(`${serviceId}:${name}`, id);
     }
+    const { data: serverDictionary } = await supabase
+      .from("dictionaries")
+      .select("id")
+      .eq("slug", "server")
+      .maybeSingle();
+    if (!serverDictionary?.id) {
+      return { ok: false, message: "サーバー図鑑 dictionary が見つかりません。" };
+    }
     const rankingImport = await importRankingsSheetToDraft({
       supabase: supabase as never,
       sheet: sheets.rankings,
       userId: user?.id ?? null,
+      dictionaryId: serverDictionary.id,
       serviceIdByKey,
       planIdByKey,
     });
@@ -561,7 +570,7 @@ export async function importFromGoogleSheetsAction(): Promise<
       );
     }
 
-    revalidatePath("/admin/spreadsheet");
+    revalidatePath("/admin", "layout");
     return {
       ok: true,
       message: "スプレッドシートから取得しました（公開DBは未更新）",

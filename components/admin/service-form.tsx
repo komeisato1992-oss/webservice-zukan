@@ -53,6 +53,8 @@ type Props = {
   comparisonValues?: ComparisonValue[];
   savedFlash?: boolean;
   initialTab?: string;
+  dictionaryId: string;
+  dictionarySlug: string;
 };
 
 function resolveTab(tab: string | undefined): TabId {
@@ -71,6 +73,8 @@ export function ServiceForm({
   comparisonValues = [],
   savedFlash,
   initialTab,
+  dictionaryId,
+  dictionarySlug,
 }: Props) {
   const [tab, setTab] = useState<TabId>(() => resolveTab(initialTab));
   const [state, formAction] = useActionState<ActionResult | null, FormData>(
@@ -260,6 +264,8 @@ export function ServiceForm({
         }`}
       >
         {service ? <input type="hidden" name="id" value={service.id} /> : null}
+        <input type="hidden" name="dictionary_id" value={dictionaryId} />
+        <input type="hidden" name="dictionary_slug" value={dictionarySlug} />
         {affiliate ? (
           <input type="hidden" name="affiliate_id" value={affiliate.id} />
         ) : null}
@@ -309,6 +315,7 @@ export function ServiceForm({
           <Field
             label="公式サイトURL"
             name="official_url"
+            type="url"
             defaultValue={seed.official_url}
             hint={
               isNew
@@ -319,8 +326,9 @@ export function ServiceForm({
           <Field
             label="アフィリエイトURL"
             name="affiliate_url"
+            type="url"
             defaultValue={service?.affiliate_url ?? affiliate?.affiliate_url ?? ""}
-            hint="https:// から始まるURLのみ。設定時は本番の公式サイトボタンで優先されます"
+            hint="入力されている場合、本サイトの公式サイトボタンにはアフィリエイトURLが優先して使用されます。"
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

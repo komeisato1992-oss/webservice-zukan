@@ -9,6 +9,7 @@ import {
   CONTENT_TYPE_LABELS,
   type PublicContentCard,
 } from "@/lib/contents/types";
+import { getServiceDestinationLink } from "@/lib/services/get-service-destination-url";
 import type { ManagedContentType } from "@/lib/types/database";
 
 type ContentServiceJoin = {
@@ -87,7 +88,10 @@ async function fetchPublishedContents(limit = 3): Promise<PublicContentCard[]> {
     ) as ContentServiceJoin | null;
     if (row.service_id && service && !service.is_published) continue;
 
-    const affiliate = service?.affiliate_url?.trim() || null;
+    const destination = getServiceDestinationLink({
+      affiliate_url: service?.affiliate_url,
+      official_url: service?.official_url,
+    });
     const contentType = row.content_type as ManagedContentType;
     cards.push({
       id: row.id,
@@ -98,8 +102,8 @@ async function fetchPublishedContents(limit = 3): Promise<PublicContentCard[]> {
       serviceId: row.service_id,
       serviceName: service?.name ?? null,
       serviceSlug: service?.slug ?? null,
-      officialUrl: affiliate || service?.official_url || null,
-      isAffiliate: Boolean(affiliate),
+      officialUrl: destination?.href ?? null,
+      isAffiliate: destination?.isAffiliate ?? false,
       sourceUrl: row.source_url,
       publishedAt: row.published_at,
       expiresAt: row.expires_at,

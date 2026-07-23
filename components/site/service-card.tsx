@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { AffiliateLink, Service, ServicePlan } from "@/lib/types/database";
 import { categoryPath, resolveOutboundLink } from "@/lib/links";
 import { formatPrice, formatStorage } from "@/lib/types/comparison";
+import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
+import { DomainServiceLogo } from "@/components/site/domain-service-logo";
 import { ServiceLogo } from "@/components/site/service-logo";
 import { OfficialSiteButton } from "@/components/site/official-site-button";
 import { RankCornerBadge, SiteBadge } from "@/components/site/site-badge";
@@ -64,6 +66,7 @@ export function ServiceCard({
   const suitedFor = service.recommended_uses?.trim() || null;
   const shortFeature = service.catchphrase?.trim() || null;
   const showRank = rank != null && rank >= 1 && rank <= 3;
+  const isDomain = categorySlug === DOMAIN_CATEGORY_SLUG;
 
   return (
     <SiteCard
@@ -79,18 +82,32 @@ export function ServiceCard({
       ) : null}
 
       <div className={cn("flex items-start gap-2.5", showRank && "pt-1 pl-7")}>
-        <Link
-          href={detailHref}
-          className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35"
-          aria-label={`${service.name}の詳細`}
-        >
-          <ServiceLogo
-            name={service.name}
-            logoUrl={service.logo_url}
-            size={featured ? "lg" : "md"}
-            fallback="none"
-          />
-        </Link>
+        {isDomain ? (
+          <Link
+            href={detailHref}
+            className="mt-0.5 w-[min(100%,190px)] max-w-[42%] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35"
+            aria-label={`${service.name}の詳細`}
+          >
+            <DomainServiceLogo
+              name={service.name}
+              slug={service.slug}
+              variant="default"
+            />
+          </Link>
+        ) : (
+          <Link
+            href={detailHref}
+            className="shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35"
+            aria-label={`${service.name}の詳細`}
+          >
+            <ServiceLogo
+              name={service.name}
+              logoUrl={service.logo_url}
+              size={featured ? "lg" : "md"}
+              fallback="none"
+            />
+          </Link>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <h2

@@ -281,7 +281,7 @@ export function BulkServiceUpdatePanel({
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            href="/admin/services"
+            href="/admin/server/services"
             className="inline-flex h-10 items-center rounded-lg border border-slate-300 px-4 text-sm text-slate-700 hover:bg-slate-50"
           >
             サービス一覧へ

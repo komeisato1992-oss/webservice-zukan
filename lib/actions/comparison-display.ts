@@ -97,7 +97,7 @@ export async function saveComparisonDisplayAction(
     }
   }
 
-  revalidatePath("/admin/comparison-fields");
+  revalidatePath("/admin", "layout");
   revalidatePublicSiteCache();
   return { ok: true, message: "比較項目の表示設定を保存しました。" };
 }

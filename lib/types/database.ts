@@ -58,9 +58,24 @@ export type Category = {
   updated_at: string;
 };
 
+export type Dictionary = {
+  id: string;
+  name: string;
+  slug: string;
+  color: string | null;
+  icon: string | null;
+  description: string | null;
+  is_public: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Service = {
   id: string;
   category_id: string;
+  /** 図鑑マスタへの紐付け（migration 202607230003） */
+  dictionary_id?: string;
   name: string;
   slug: string;
   short_name: string | null;
@@ -111,6 +126,73 @@ export type Service = {
   last_change_source?: string | null;
   /** Optimistic lock for spreadsheet import (added in 202607190002) */
   data_version?: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DomainFeatureStatus = "supported" | "unsupported";
+
+export type DomainFaqItem = {
+  question: string;
+  answer: string;
+};
+
+/** ドメイン図鑑専用詳細（migration 202607230004） */
+export type DomainServiceDetails = {
+  id: string;
+  service_id: string;
+  com_registration_price: number | null;
+  com_renewal_price: number | null;
+  com_transfer_price: number | null;
+  jp_registration_price: number | null;
+  jp_renewal_price: number | null;
+  jp_transfer_price: number | null;
+  co_jp_registration_price: number | null;
+  co_jp_renewal_price: number | null;
+  co_jp_transfer_price: number | null;
+  net_registration_price: number | null;
+  net_renewal_price: number | null;
+  net_transfer_price: number | null;
+  initial_fee: number | null;
+  campaign_price_note: string | null;
+  price_note: string | null;
+  whois_privacy_status: DomainFeatureStatus | null;
+  whois_privacy_price: number | null;
+  dns_status: DomainFeatureStatus | null;
+  dnssec_status: DomainFeatureStatus | null;
+  auto_renewal_status: DomainFeatureStatus | null;
+  transfer_status: DomainFeatureStatus | null;
+  japanese_domain_status: DomainFeatureStatus | null;
+  phone_support_status: DomainFeatureStatus | null;
+  email_support_status: DomainFeatureStatus | null;
+  chat_support_status: DomainFeatureStatus | null;
+  server_bundle_benefit: DomainFeatureStatus | null;
+  free_domain_benefit: DomainFeatureStatus | null;
+  feature_note: string | null;
+  merits: string | null;
+  demerits: string | null;
+  campaign_name: string | null;
+  campaign_description: string | null;
+  campaign_end_date: string | null;
+  campaign_url: string | null;
+  campaign_is_active: boolean;
+  intro_text: string | null;
+  outro_text: string | null;
+  faq: DomainFaqItem[];
+  created_at: string;
+  updated_at: string;
+};
+
+/** ドメイン図鑑・比較表の表示設定（migration 202607230006） */
+export type DomainComparisonItem = {
+  id: string;
+  dictionary_id: string;
+  group_key: "price" | "feature" | "support";
+  item_key: string;
+  display_name: string;
+  is_visible: boolean;
+  sort_order: number;
+  highlight_best: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -455,11 +537,111 @@ type Tables = {
     Update: Partial<Category>;
     Relationships: [];
   };
+  dictionaries: {
+    Row: Dictionary;
+    Insert: {
+      id?: string;
+      name: string;
+      slug: string;
+      color?: string | null;
+      icon?: string | null;
+      description?: string | null;
+      is_public?: boolean;
+      sort_order?: number;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: Partial<Dictionary>;
+    Relationships: [];
+  };
+  domain_service_details: {
+    Row: DomainServiceDetails;
+    Insert: {
+      id?: string;
+      service_id: string;
+      com_registration_price?: number | null;
+      com_renewal_price?: number | null;
+      com_transfer_price?: number | null;
+      jp_registration_price?: number | null;
+      jp_renewal_price?: number | null;
+      jp_transfer_price?: number | null;
+      co_jp_registration_price?: number | null;
+      co_jp_renewal_price?: number | null;
+      co_jp_transfer_price?: number | null;
+      net_registration_price?: number | null;
+      net_renewal_price?: number | null;
+      net_transfer_price?: number | null;
+      initial_fee?: number | null;
+      campaign_price_note?: string | null;
+      price_note?: string | null;
+      whois_privacy_status?: DomainFeatureStatus | null;
+      whois_privacy_price?: number | null;
+      dns_status?: DomainFeatureStatus | null;
+      dnssec_status?: DomainFeatureStatus | null;
+      auto_renewal_status?: DomainFeatureStatus | null;
+      transfer_status?: DomainFeatureStatus | null;
+      japanese_domain_status?: DomainFeatureStatus | null;
+      phone_support_status?: DomainFeatureStatus | null;
+      email_support_status?: DomainFeatureStatus | null;
+      chat_support_status?: DomainFeatureStatus | null;
+      server_bundle_benefit?: DomainFeatureStatus | null;
+      free_domain_benefit?: DomainFeatureStatus | null;
+      feature_note?: string | null;
+      merits?: string | null;
+      demerits?: string | null;
+      campaign_name?: string | null;
+      campaign_description?: string | null;
+      campaign_end_date?: string | null;
+      campaign_url?: string | null;
+      campaign_is_active?: boolean;
+      intro_text?: string | null;
+      outro_text?: string | null;
+      faq?: DomainFaqItem[];
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: Partial<DomainServiceDetails>;
+    Relationships: [
+      {
+        foreignKeyName: "domain_service_details_service_id_fkey";
+        columns: ["service_id"];
+        isOneToOne: true;
+        referencedRelation: "services";
+        referencedColumns: ["id"];
+      },
+    ];
+  };
+  domain_comparison_items: {
+    Row: DomainComparisonItem;
+    Insert: {
+      id?: string;
+      dictionary_id: string;
+      group_key: "price" | "feature" | "support";
+      item_key: string;
+      display_name: string;
+      is_visible?: boolean;
+      sort_order?: number;
+      highlight_best?: boolean;
+      created_at?: string;
+      updated_at?: string;
+    };
+    Update: Partial<DomainComparisonItem>;
+    Relationships: [
+      {
+        foreignKeyName: "domain_comparison_items_dictionary_id_fkey";
+        columns: ["dictionary_id"];
+        isOneToOne: false;
+        referencedRelation: "dictionaries";
+        referencedColumns: ["id"];
+      },
+    ];
+  };
   services: {
     Row: Service;
     Insert: {
       id?: string;
       category_id: string;
+      dictionary_id: string;
       name: string;
       slug: string;
       short_name?: string | null;
@@ -474,6 +656,7 @@ type Tables = {
       affiliate_status?: string | null;
       status?: ServiceStatus;
       is_published?: boolean;
+      is_site_visible?: boolean;
       is_featured?: boolean;
       display_order?: number;
       editor_score?: number | null;
@@ -486,6 +669,7 @@ type Tables = {
       seo_description?: string | null;
       canonical_url?: string | null;
       og_image_url?: string | null;
+      company_name?: string | null;
       data_version?: number;
       created_at?: string;
       updated_at?: string;
@@ -497,6 +681,13 @@ type Tables = {
         columns: ["category_id"];
         isOneToOne: false;
         referencedRelation: "categories";
+        referencedColumns: ["id"];
+      },
+      {
+        foreignKeyName: "services_dictionary_id_fkey";
+        columns: ["dictionary_id"];
+        isOneToOne: false;
+        referencedRelation: "dictionaries";
         referencedColumns: ["id"];
       },
     ];

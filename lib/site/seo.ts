@@ -23,6 +23,13 @@ export const PAGE_META = {
       "おすすめのレンタルサーバーを料金、容量、WordPress機能、サポートなどで比較。初心者・ブログ・法人向けなど、目的に合ったサービスを探せます。",
     path: "/server",
   },
+  domain: {
+    title:
+      "ドメイン図鑑｜取得・更新料金を比較できるドメイン会社比較サイト",
+    description:
+      "ドメイン会社の取得料金・更新料金・移管料金、Whois代理公開、DNS、サポートを比較。お名前.com、ムームードメイン、XServerドメインなどから自分に合うサービスを選べます。",
+    path: "/domain",
+  },
   services: {
     title: "レンタルサーバー一覧",
     description:
@@ -65,17 +72,18 @@ type PageMetaKey = keyof typeof PAGE_META;
 
 export function buildPageMetadata(
   key: PageMetaKey,
-  options?: { absoluteTitle?: boolean },
+  options?: { absoluteTitle?: boolean; siteName?: string },
 ): Metadata {
   const page = PAGE_META[key];
   const url = `${getSiteUrl()}${page.path}`;
+  const brand = options?.siteName ?? SITE_BRAND;
   const title = options?.absoluteTitle
     ? { absolute: page.title }
     : page.title;
 
   const ogTitle = options?.absoluteTitle
     ? page.title
-    : `${page.title} | ${SITE_BRAND}`;
+    : `${page.title} | ${brand}`;
   const ogImage = getDefaultOgImagePath();
 
   return {
@@ -86,7 +94,7 @@ export function buildPageMetadata(
       title: ogTitle,
       description: page.description,
       url,
-      siteName: SITE_BRAND,
+      siteName: brand,
       locale: "ja_JP",
       type: "website",
       images: [{ url: ogImage }],

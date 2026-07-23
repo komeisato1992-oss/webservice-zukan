@@ -33,7 +33,7 @@ export function ComparisonFieldForm({ categories, field }: Props) {
       if (result.ok) {
         router.refresh();
         if (!field) {
-          router.push("/admin/comparison-fields");
+          router.push("/admin/server/comparison-fields");
         }
       }
       return result;
@@ -264,7 +264,7 @@ export function ComparisonFieldForm({ categories, field }: Props) {
             const result = await deleteComparisonFieldAction(fd);
             setDeleteState(result);
             if (result.ok) {
-              router.push("/admin/comparison-fields");
+              router.push("/admin/server/comparison-fields");
             }
           }}
         >

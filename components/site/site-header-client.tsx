@@ -2,9 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { SITE_BRAND, SITE_NAV } from "@/lib/site/brand";
+import {
+  DOMAIN_BRAND,
+  DOMAIN_BRAND_SUB,
+  DOMAIN_NAV,
+} from "@/lib/site/domain-brand";
 import { cn } from "@/components/site/ui";
 
 type Props = {
@@ -17,7 +23,9 @@ const LOGO_HEIGHT = 61;
 
 export function SiteHeaderClient({ servicesHref }: Props) {
   const [compact, setCompact] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isDomain = pathname?.startsWith("/domain") ?? false;
 
   useEffect(() => {
     const onScroll = () => setCompact(window.scrollY > 24);
@@ -26,22 +34,42 @@ export function SiteHeaderClient({ servicesHref }: Props) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const compareHref = servicesHref.replace(/\/services\/?$/, "/compare");
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
-  const navItems = SITE_NAV.map((item) =>
-    item.label === "サービス一覧"
-      ? { ...item, href: servicesHref }
-      : item.label === "比較"
-        ? { ...item, href: compareHref }
-        : item,
-  );
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const homeHref = isDomain ? "/domain" : "/server";
+  const brand = isDomain ? DOMAIN_BRAND : SITE_BRAND;
+
+  const navItems = isDomain
+    ? DOMAIN_NAV.map((item) => ({ href: item.href, label: item.label }))
+    : SITE_NAV.map((item) =>
+        item.label === "サービス一覧"
+          ? { ...item, href: servicesHref }
+          : item.label === "比較"
+            ? {
+                ...item,
+                href: servicesHref.replace(/\/services\/?$/, "/compare"),
+              }
+            : item,
+      );
 
   function isActive(href: string) {
-    if (href.includes("#")) {
-      return false;
-    }
+    if (href.includes("#")) return false;
     if (href === "/server") {
       return pathname === "/server" || pathname === "/server/";
+    }
+    if (href === "/domain") {
+      return pathname === "/domain" || pathname === "/domain/";
     }
     return pathname === href || pathname.startsWith(`${href}/`);
   }
@@ -49,7 +77,8 @@ export function SiteHeaderClient({ servicesHref }: Props) {
   return (
     <header
       className={cn(
-        "site-header-navy sticky top-0 z-50 border-b transition-[box-shadow,height]",
+        "sticky top-0 z-50 border-b transition-[box-shadow,height]",
+        isDomain ? "site-header-domain" : "site-header-navy",
         compact && "shadow-[0_8px_24px_rgba(0,0,0,0.28)]",
       )}
     >
@@ -62,21 +91,37 @@ export function SiteHeaderClient({ servicesHref }: Props) {
         )}
       >
         <Link
-          href="/server"
-          className="inline-flex min-w-0 max-w-[min(100%,16.5rem)] shrink items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--navy-deep)] sm:max-w-[min(100%,19rem)]"
-          aria-label={SITE_BRAND}
+          href={homeHref}
+          className={cn(
+            "inline-flex min-w-0 shrink items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+            isDomain
+              ? "max-w-[min(100%,14rem)] flex-col items-start gap-0.5 sm:max-w-[min(100%,16rem)]"
+              : "max-w-[min(100%,16.5rem)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--navy-deep)] sm:max-w-[min(100%,19rem)]",
+          )}
+          aria-label={brand}
         >
-          <Image
-            src="/images/site-logo.png"
-            alt={SITE_BRAND}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            priority
-            className={cn(
-              "h-14 w-auto max-w-full object-contain object-left",
-              compact ? "sm:h-[3.25rem]" : "sm:h-16",
-            )}
-          />
+          {isDomain ? (
+            <>
+              <span className="text-[15px] font-extrabold tracking-tight text-white sm:text-[17px]">
+                {DOMAIN_BRAND}
+              </span>
+              <span className="text-[10px] font-medium tracking-wide text-white/70 sm:text-[11px]">
+                {DOMAIN_BRAND_SUB}
+              </span>
+            </>
+          ) : (
+            <Image
+              src="/images/site-logo.png"
+              alt={SITE_BRAND}
+              width={LOGO_WIDTH}
+              height={LOGO_HEIGHT}
+              priority
+              className={cn(
+                "h-14 w-auto max-w-full object-contain object-left",
+                compact ? "sm:h-[3.25rem]" : "sm:h-16",
+              )}
+            />
+          )}
         </Link>
 
         <nav
@@ -87,7 +132,7 @@ export function SiteHeaderClient({ servicesHref }: Props) {
             const active = isActive(item.href);
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 href={item.href}
                 className={cn(
                   "relative rounded-md px-2.5 py-1.5 text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35",
@@ -99,7 +144,10 @@ export function SiteHeaderClient({ servicesHref }: Props) {
                 {item.label}
                 {active ? (
                   <span
-                    className="absolute inset-x-2.5 -bottom-0.5 h-0.5 rounded-full bg-[#7EB6FF]"
+                    className={cn(
+                      "absolute inset-x-2.5 -bottom-0.5 h-0.5 rounded-full",
+                      isDomain ? "bg-[#9FE8E2]" : "bg-[#7EB6FF]",
+                    )}
                     aria-hidden
                   />
                 ) : null}
@@ -107,7 +155,51 @@ export function SiteHeaderClient({ servicesHref }: Props) {
             );
           })}
         </nav>
+
+        <button
+          type="button"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-md text-white/90 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 lg:hidden"
+          aria-expanded={menuOpen}
+          aria-controls="site-mobile-nav"
+          aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? <X size={22} strokeWidth={2} /> : <Menu size={22} strokeWidth={2} />}
+        </button>
       </div>
+
+      {menuOpen ? (
+        <nav
+          id="site-mobile-nav"
+          aria-label="モバイルメニュー"
+          className={cn(
+            "border-t border-white/15 lg:hidden",
+            isDomain ? "bg-[rgba(5,102,99,0.98)]" : "bg-[rgba(6,21,47,0.98)]",
+          )}
+        >
+          <ul className="mx-auto flex max-w-[var(--container-max)] flex-col px-2 py-2 sm:px-4">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <li key={`m-${item.href}-${item.label}`}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex min-h-11 items-center rounded-md px-3 text-[14px] transition",
+                      active
+                        ? "bg-white/12 font-semibold text-white"
+                        : "text-white/85 hover:bg-white/8 hover:text-white",
+                    )}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      ) : null}
     </header>
   );
 }

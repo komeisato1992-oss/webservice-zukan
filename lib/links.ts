@@ -1,4 +1,5 @@
 import type { AffiliateLink, Service, ServicePlan } from "@/lib/types/database";
+import { getServiceDestinationLink } from "@/lib/services/get-service-destination-url";
 
 export type OutboundLink = {
   href: string;
@@ -9,8 +10,9 @@ export type OutboundLink = {
 /**
  * 本番「公式サイトへ」の URL 優先順位:
  * 1. services.affiliate_url（手入力）
- * 2. 互換: affiliate_links / primary_link_url
+ * 2. 互換: affiliate_links（レガシー）
  * 3. services.official_url
+ * どちらも無い場合は null（CTA非表示）
  */
 export function resolveOutboundLink(
   service: Pick<
@@ -24,6 +26,7 @@ export function resolveOutboundLink(
   _plan?: Pick<ServicePlan, "official_url"> | null,
 ): OutboundLink | null {
   void _plan;
+  void service.primary_link_url;
 
   const serviceAffiliate = service.affiliate_url?.trim();
   if (serviceAffiliate) {
@@ -37,17 +40,11 @@ export function resolveOutboundLink(
     return { href: primary.affiliate_url.trim(), isAffiliate: true };
   }
 
-  const primaryLink = service.primary_link_url?.trim();
-  if (primaryLink) {
-    return { href: primaryLink, isAffiliate: true };
-  }
-
-  const official = service.official_url?.trim();
-  if (official) {
-    return { href: official, isAffiliate: false };
-  }
-
-  return null;
+  const destination = getServiceDestinationLink({
+    affiliate_url: null,
+    official_url: service.official_url,
+  });
+  return destination;
 }
 
 export function resolveOutboundUrl(
@@ -64,10 +61,14 @@ export function resolveOutboundUrl(
   return resolveOutboundLink(service, affiliateLinks, plan)?.href ?? null;
 }
 
-/** 外部リンク共通 rel（公式・アフィリエイト共通） */
-export function outboundRel(_isAffiliate?: boolean): string {
-  void _isAffiliate;
-  return "noopener noreferrer sponsored";
+/**
+ * 外部リンク共通 rel。
+ * affiliate_url 利用時は必ず sponsored を含める。
+ */
+export function outboundRel(isAffiliate?: boolean): string {
+  return isAffiliate
+    ? "noopener noreferrer sponsored"
+    : "noopener noreferrer";
 }
 
 export const APPROVAL_STATUS_LABELS: Record<string, string> = {

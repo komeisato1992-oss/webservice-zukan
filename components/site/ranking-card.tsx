@@ -96,7 +96,21 @@ export function RankingCard({
         {rank}位
       </p>
 
-      <h3 className="mt-2.5 text-center text-[19px] font-extrabold leading-snug tracking-tight text-[var(--text-primary)] sm:text-[20px]">
+      {/* 固定高さロゴ枠（ロゴ主役・サービス名は補助）。未設定時も高さを維持 */}
+      <div className="mt-2 flex h-[4.8rem] w-full items-center justify-center">
+        {card.service.logo_url ? (
+          // eslint-disable-next-line @next/next/no-img-element -- 比率維持の contain 表示
+          <img
+            src={card.service.logo_url}
+            alt={`${card.service.name}のロゴ`}
+            className="h-auto max-h-[3.5rem] w-auto max-w-[240px] object-contain object-center"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : null}
+      </div>
+
+      <h3 className="mt-1 text-center text-[16px] font-extrabold leading-snug tracking-tight text-[var(--text-primary)] sm:text-[17px]">
         <span className="jp-break">{card.service.name}</span>
       </h3>
 

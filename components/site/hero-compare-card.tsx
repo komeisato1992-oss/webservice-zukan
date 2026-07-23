@@ -98,6 +98,7 @@ export function HeroCompareCard({
                     planName={item.representativePlan?.name}
                     planDisplayName={item.representativePlan?.display_name}
                     logoUrl={item.service.logo_url}
+                    showLogo={false}
                     href={categoryPath(
                       categorySlug,
                       "services",

@@ -37,8 +37,8 @@ async function revalidateServicePaths(serviceId: string) {
     .eq("id", serviceId)
     .maybeSingle();
 
-  revalidatePath(`/admin/services/${serviceId}`);
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
 
@@ -307,7 +307,7 @@ export async function saveComparisonFieldAction(
     }
   }
 
-  revalidatePath("/admin/comparison-fields");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   return { ok: true, message: "比較項目を保存しました。" };
@@ -325,7 +325,7 @@ export async function deleteComparisonFieldAction(
   const { error } = await supabase.from("comparison_fields").delete().eq("id", id);
   if (error) return { ok: false, message: error.message };
 
-  revalidatePath("/admin/comparison-fields");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
   return { ok: true, message: "比較項目を削除しました。" };
@@ -348,7 +348,7 @@ export async function toggleComparisonFieldPublishAction(
 
   if (error) return;
 
-  revalidatePath("/admin/comparison-fields");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   revalidatePublicSiteCache();
 }

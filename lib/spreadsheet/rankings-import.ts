@@ -26,12 +26,23 @@ export async function importRankingsSheetToDraft(params: {
   supabase: Client;
   sheet: SheetRecords;
   userId: string | null;
+  dictionaryId: string;
   /** service_id / slug → id */
   serviceIdByKey: Map<string, string>;
   /** plan_id / `${serviceId}:${planName}` → id */
   planIdByKey: Map<string, string>;
 }): Promise<{ ok: boolean; message: string; imported: number }> {
-  const { supabase, sheet, userId, serviceIdByKey, planIdByKey } = params;
+  const {
+    supabase,
+    sheet,
+    userId,
+    dictionaryId,
+    serviceIdByKey,
+    planIdByKey,
+  } = params;
+  if (!dictionaryId) {
+    return { ok: false, message: "dictionary_id が必要です", imported: 0 };
+  }
   if (sheet.missing) {
     return { ok: true, message: "rankingsシートなし（スキップ）", imported: 0 };
   }
@@ -40,7 +51,7 @@ export async function importRankingsSheetToDraft(params: {
   }
 
   const byKey = new Map<string, RankingEntryDraft>();
-  for (const slot of emptyRankingEntries()) {
+  for (const slot of emptyRankingEntries(RANKING_PURPOSE_OPTIONS)) {
     byKey.set(`${slot.purpose_id}:${slot.rank}`, { ...slot });
   }
 
@@ -84,12 +95,18 @@ export async function importRankingsSheetToDraft(params: {
   }
 
   const payload: RankingDraftPayload = {
-    entries: emptyRankingEntries().map(
+    entries: emptyRankingEntries(RANKING_PURPOSE_OPTIONS).map(
       (slot) => byKey.get(`${slot.purpose_id}:${slot.rank}`) ?? slot,
     ),
   };
 
-  const saved = await saveRankingDraft(supabase, payload, userId);
+  const saved = await saveRankingDraft(
+    supabase,
+    dictionaryId,
+    payload,
+    userId,
+    RANKING_PURPOSE_OPTIONS,
+  );
   if (!saved.ok) {
     return { ok: false, message: saved.message, imported: 0 };
   }

@@ -13,7 +13,7 @@ import {
 } from "@/lib/contents/article-generator";
 
 function revalidateContents() {
-  revalidatePath("/admin/contents");
+  revalidatePath("/admin", "layout");
   revalidatePublicSiteCache();
 }
 
@@ -235,7 +235,7 @@ export async function insertArticleCandidateFromScrape(
     return { ok: false, message: error.message };
   }
 
-  revalidatePath("/admin/contents");
+  revalidatePath("/admin", "layout");
   return {
     ok: true,
     message: "記事候補をコンテンツ管理に保存しました。",

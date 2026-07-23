@@ -350,8 +350,8 @@ export async function runOfficialInfoScraperAction(input: {
     };
   }
 
-  revalidatePath(`/admin/services/${service.id}`);
-  revalidatePath("/admin/scraping");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
 
   // Diff → scraping_candidates（ドラフト確認用。自動公開しない）
   if ((status === "success" || status === "partial") && diffs.length > 0) {

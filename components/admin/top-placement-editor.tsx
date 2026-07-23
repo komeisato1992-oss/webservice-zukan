@@ -20,6 +20,7 @@ type Props = {
   allServices: TopPlacementServiceRow[];
   /** 一覧表示用（絞り込み後） */
   visibleServices: TopPlacementServiceRow[];
+  dictionarySlug: string;
 };
 
 function orderedSelectedIds(
@@ -43,6 +44,7 @@ function orderedSelectedIds(
 export function TopPlacementEditor({
   allServices,
   visibleServices,
+  dictionarySlug,
 }: Props) {
   const [featuredIds, setFeaturedIds] = useState<string[]>(() =>
     orderedSelectedIds(
@@ -238,7 +240,7 @@ export function TopPlacementEditor({
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
-                  href={`/admin/services/${service.id}`}
+                  href={`/admin/${dictionarySlug}/services/${service.id}`}
                   className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium"
                 >
                   編集
@@ -343,7 +345,7 @@ export function TopPlacementEditor({
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        href={`/admin/services/${service.id}`}
+                        href={`/admin/${dictionarySlug}/services/${service.id}`}
                         className="font-medium text-blue-700 hover:underline"
                       >
                         編集

@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { RANKING_PURPOSE_OPTIONS } from "@/lib/site/content";
+import {
+  RANKING_PURPOSE_OPTIONS,
+  type PurposeOption,
+} from "@/lib/site/content";
 import type { RankingDraftPayload, RankingEntryDraft } from "@/lib/cms/rankings";
 import {
   discardRankingDraftAction,
@@ -24,23 +27,31 @@ type PlanOption = {
 };
 
 type Props = {
+  dictionaryId: string;
   initialPayload: RankingDraftPayload;
   publishedPayload: RankingDraftPayload | null;
   services: ServiceOption[];
   plans: PlanOption[];
   changeCount: number;
+  /** 表示するランキングカテゴリ。未指定時はサーバー図鑑用 */
+  purposeOptions?: PurposeOption[];
+  /** true のときプラン選択を出さない（ドメイン図鑑） */
+  hidePlanSelect?: boolean;
 };
 
 export function RankingsEditor({
+  dictionaryId,
   initialPayload,
   publishedPayload,
   services,
   plans,
   changeCount,
+  purposeOptions = RANKING_PURPOSE_OPTIONS,
+  hidePlanSelect = false,
 }: Props) {
   const [payload, setPayload] = useState(initialPayload);
   const [purposeId, setPurposeId] = useState(
-    RANKING_PURPOSE_OPTIONS[0]?.id ?? "overall",
+    purposeOptions[0]?.id ?? "overall",
   );
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
     null,
@@ -78,6 +89,9 @@ export function RankingsEditor({
         if (patch.service_id !== undefined && patch.service_id !== e.service_id) {
           next.plan_id = null;
         }
+        if (hidePlanSelect) {
+          next.plan_id = null;
+        }
         return next;
       }),
     }));
@@ -90,7 +104,7 @@ export function RankingsEditor({
 
   function saveDraft() {
     start(async () => {
-      const result = await saveRankingDraftAction(payload);
+      const result = await saveRankingDraftAction(dictionaryId, payload);
       setMessage({ ok: result.ok, text: result.message });
     });
   }
@@ -98,12 +112,12 @@ export function RankingsEditor({
   function publish() {
     if (!window.confirm("ランキングを本サイトへ公開反映しますか？")) return;
     start(async () => {
-      const saved = await saveRankingDraftAction(payload);
+      const saved = await saveRankingDraftAction(dictionaryId, payload);
       if (!saved.ok) {
         setMessage({ ok: false, text: saved.message });
         return;
       }
-      const result = await publishRankingDraftAction();
+      const result = await publishRankingDraftAction(dictionaryId);
       setMessage({ ok: result.ok, text: result.message });
     });
   }
@@ -113,7 +127,7 @@ export function RankingsEditor({
       return;
     }
     start(async () => {
-      const result = await discardRankingDraftAction();
+      const result = await discardRankingDraftAction(dictionaryId);
       setMessage({ ok: result.ok, text: result.message });
       if (result.ok && publishedPayload) setPayload(publishedPayload);
     });
@@ -152,7 +166,7 @@ export function RankingsEditor({
           onChange={(e) => setPurposeId(e.target.value)}
           className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm"
         >
-          {RANKING_PURPOSE_OPTIONS.map((o) => (
+          {purposeOptions.map((o) => (
             <option key={o.id} value={o.id}>
               {o.label}
             </option>
@@ -161,7 +175,7 @@ export function RankingsEditor({
       </div>
 
       <div className="mt-4 hidden flex-wrap gap-1.5 lg:flex">
-        {RANKING_PURPOSE_OPTIONS.map((o) => (
+        {purposeOptions.map((o) => (
           <button
             key={o.id}
             type="button"
@@ -212,7 +226,11 @@ export function RankingsEditor({
                 </label>
               </div>
 
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div
+                className={`mt-3 grid gap-3 ${
+                  hidePlanSelect ? "" : "sm:grid-cols-2"
+                }`}
+              >
                 <div>
                   <label className="mb-1 block text-sm font-medium text-slate-700">
                     サービス
@@ -235,28 +253,30 @@ export function RankingsEditor({
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-slate-700">
-                    プラン
-                  </label>
-                  <select
-                    value={entry.plan_id ?? ""}
-                    onChange={(e) =>
-                      updateEntry(entry.rank, {
-                        plan_id: e.target.value || null,
-                      })
-                    }
-                    disabled={!entry.service_id}
-                    className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm disabled:bg-slate-50"
-                  >
-                    <option value="">代表プラン（自動）</option>
-                    {planOptions.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {!hidePlanSelect ? (
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                      プラン
+                    </label>
+                    <select
+                      value={entry.plan_id ?? ""}
+                      onChange={(e) =>
+                        updateEntry(entry.rank, {
+                          plan_id: e.target.value || null,
+                        })
+                      }
+                      disabled={!entry.service_id}
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm disabled:bg-slate-50"
+                    >
+                      <option value="">代表プラン（自動）</option>
+                      {planOptions.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
               </div>
 
               <div className="mt-3">

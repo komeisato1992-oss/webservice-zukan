@@ -307,7 +307,18 @@ export async function loadSpreadsheetExportData(
     公開状態: c.status,
   }));
 
-  const { draft: rankingDraft } = await ensureRankingDraft(supabase as never);
+  const { data: serverDictionary } = await supabase
+    .from("dictionaries")
+    .select("id")
+    .eq("slug", "server")
+    .maybeSingle();
+  const { draft: rankingDraft } = serverDictionary?.id
+    ? await ensureRankingDraft(
+        supabase as never,
+        serverDictionary.id,
+        RANKING_PURPOSE_OPTIONS,
+      )
+    : { draft: null };
   const planById = new Map(planList.map((p) => [p.id, p]));
   const rankingRows: SheetRow[] = (rankingDraft?.payload.entries ?? []).map(
     (e: {

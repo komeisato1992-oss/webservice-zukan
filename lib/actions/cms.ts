@@ -64,8 +64,8 @@ export async function saveServiceDraftAction(
   );
   if (!result.ok) return result;
 
-  revalidatePath(`/admin/services/${serviceId}`);
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
   return {
     ok: true,
     message: `下書きを保存しました（未公開変更 ${result.changeCount} 件）。本番には未反映です。`,
@@ -82,7 +82,7 @@ export async function discardServiceDraftAction(
   const result = await discardServiceDraft(supabase, serviceId);
   if (!result.ok) return result;
 
-  revalidatePath(`/admin/services/${serviceId}`);
+  revalidatePath("/admin", "layout");
   return { ok: true, message: "変更を破棄し、公開内容に戻しました。" };
 }
 
@@ -116,9 +116,9 @@ export async function publishServiceDraftAction(
   );
   if (!result.ok) return result;
 
-  revalidatePath(`/admin/services/${serviceId}`);
-  revalidatePath("/admin/services");
-  revalidatePath("/admin/history");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
   revalidatePath("/");
   return {
     ok: true,
@@ -327,11 +327,11 @@ export async function acceptScrapingCandidatesAction(
       );
     }
 
-    revalidatePath(`/admin/services/${serviceId}`);
+    revalidatePath("/admin", "layout");
   }
 
-  revalidatePath("/admin/scraping");
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
   return {
     ok: true,
     message:
@@ -364,7 +364,7 @@ export async function saveComparisonLayoutDraftAction(
       updates,
     );
     if (!result.ok) return result;
-    revalidatePath("/admin/comparison-fields");
+    revalidatePath("/admin", "layout");
     revalidatePath("/");
     return { ok: true, message: "比較表の表示設定を公開しました。" };
   }
@@ -383,7 +383,7 @@ export async function saveComparisonLayoutDraftAction(
     if (error) return { ok: false, message: error.message };
   }
 
-  revalidatePath("/admin/comparison-fields");
+  revalidatePath("/admin", "layout");
   return {
     ok: true,
     message: "表示設定を下書き保存しました。公開へ反映するまで本番には出ません。",

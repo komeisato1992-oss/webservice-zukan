@@ -11,10 +11,11 @@ import { createPublicClient } from "@/lib/supabase/public";
 import type { AffiliateLink, Service } from "@/lib/types/database";
 import { formatPrice, formatStorage } from "@/lib/types/comparison";
 import { ServiceComparisonSection } from "@/components/site/service-comparison-section";
-import { ServiceLogo } from "@/components/site/service-logo";
+import { DomainServiceLogo } from "@/components/site/domain-service-logo";
 import { OfficialSiteButton } from "@/components/site/official-site-button";
 import { AddToCompareButton } from "@/components/site/compare/add-to-compare-button";
 import { SITE_BRAND } from "@/lib/site/brand";
+import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
 import { pickRepresentativePlan } from "@/lib/site/plan-utils";
 import { getDefaultOgImagePath, getSiteUrl } from "@/lib/site/seo";
 import {
@@ -259,104 +260,158 @@ export default async function ServiceDetailPage({ params }: Props) {
       />
 
       <div className="mt-5 rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 sm:p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <ServiceLogo
-            name={service.name}
-            logoUrl={service.logo_url}
-            size="lg"
-            className="rounded-[var(--radius-card)]"
-            fallback="none"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-medium text-[var(--navy)]">
-              {category.name}
-            </p>
-            <h1 className="mt-1 text-[1.625rem] font-bold tracking-tight text-[var(--text-primary)] text-pretty sm:text-[2rem]">
-              <span className="jp-keep">{service.name}</span>
-            </h1>
-            <div className="mt-3">
-              <PageValueProps
-                items={[
-                  "特徴が分かる",
-                  "他サービスと比較できる",
-                  "注意点を確認できる",
-                ]}
-              />
-            </div>
-
-            <dl className="mt-4 grid gap-2 text-[13px] sm:grid-cols-2">
-              {feature ? (
-                <div className="sm:col-span-2">
-                  <dt className="text-[11px] font-medium text-[var(--text-muted)]">
-                    特徴
-                  </dt>
-                  <dd className="mt-0.5 text-[var(--text-primary)]">{feature}</dd>
-                </div>
-              ) : null}
-              {suitedFor ? (
-                <div className="sm:col-span-2">
-                  <dt className="text-[11px] font-medium text-[var(--text-muted)]">
-                    向いている人
-                  </dt>
-                  <dd className="mt-0.5 text-[var(--text-body)]">{suitedFor}</dd>
-                </div>
-              ) : null}
-              {price ? (
-                <div>
-                  <dt className="text-[11px] font-medium text-[var(--text-muted)]">
-                    代表料金
-                  </dt>
-                  <dd className="mt-0.5 text-lg font-bold tabular-nums text-[var(--text-primary)]">
-                    {price}
-                    <span className="ml-0.5 text-[12px] font-medium text-[var(--text-muted)]">
-                      /月
-                    </span>
-                  </dd>
-                </div>
-              ) : null}
-              {storage ? (
-                <div>
-                  <dt className="text-[11px] font-medium text-[var(--text-muted)]">
-                    容量
-                  </dt>
-                  <dd className="mt-0.5 font-semibold text-[var(--text-primary)]">
-                    {storage}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-
-            <div className="mt-5 flex flex-wrap gap-2.5">
-              <AddToCompareButton
-                slug={service.slug}
-                name={service.name}
-                categorySlug={category.slug}
-                emphasis="primary"
-              />
-              {outbound ? (
-                <OfficialSiteButton
-                  href={outbound.href}
-                  isAffiliate={outbound.isAffiliate}
-                  label="公式サイトを見る"
-                  size="md"
-                  fullWidth={false}
-                  className="min-w-[10rem]"
-                  analytics={{
-                    service_name: service.name,
-                    page_type: "service_detail",
-                    button_location: "hero",
-                  }}
+        {(() => {
+          const isDomain = category.slug === DOMAIN_CATEGORY_SLUG;
+          const metaAndActions = (
+            <>
+              <div className="mt-3">
+                <PageValueProps
+                  items={[
+                    "特徴が分かる",
+                    "他サービスと比較できる",
+                    "注意点を確認できる",
+                  ]}
                 />
+              </div>
+
+              <dl className="mt-4 grid gap-2 text-[13px] sm:grid-cols-2">
+                {feature ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-[11px] font-medium text-[var(--text-muted)]">
+                      特徴
+                    </dt>
+                    <dd className="mt-0.5 text-[var(--text-primary)]">{feature}</dd>
+                  </div>
+                ) : null}
+                {suitedFor ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-[11px] font-medium text-[var(--text-muted)]">
+                      向いている人
+                    </dt>
+                    <dd className="mt-0.5 text-[var(--text-body)]">{suitedFor}</dd>
+                  </div>
+                ) : null}
+                {price ? (
+                  <div>
+                    <dt className="text-[11px] font-medium text-[var(--text-muted)]">
+                      代表料金
+                    </dt>
+                    <dd className="mt-0.5 text-lg font-bold tabular-nums text-[var(--text-primary)]">
+                      {price}
+                      <span className="ml-0.5 text-[12px] font-medium text-[var(--text-muted)]">
+                        /月
+                      </span>
+                    </dd>
+                  </div>
+                ) : null}
+                {storage ? (
+                  <div>
+                    <dt className="text-[11px] font-medium text-[var(--text-muted)]">
+                      容量
+                    </dt>
+                    <dd className="mt-0.5 font-semibold text-[var(--text-primary)]">
+                      {storage}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              <div className="mt-5 flex flex-wrap gap-2.5">
+                <AddToCompareButton
+                  slug={service.slug}
+                  name={service.name}
+                  categorySlug={category.slug}
+                  emphasis="primary"
+                />
+                {outbound ? (
+                  <OfficialSiteButton
+                    href={outbound.href}
+                    isAffiliate={outbound.isAffiliate}
+                    label="公式サイトを見る"
+                    size="md"
+                    fullWidth={false}
+                    className="min-w-[10rem]"
+                    analytics={{
+                      service_name: service.name,
+                      page_type: "service_detail",
+                      button_location: "hero",
+                    }}
+                  />
+                ) : null}
+                <Link
+                  href={categoryPath(category.slug, "services")}
+                  className={buttonClass("ghost", "md")}
+                >
+                  一覧に戻る
+                </Link>
+              </div>
+            </>
+          );
+
+          if (isDomain) {
+            return (
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                <div className="w-full max-w-[190px] shrink-0">
+                  <DomainServiceLogo
+                    name={service.name}
+                    slug={service.slug}
+                    variant="default"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] font-medium text-[var(--navy)]">
+                    {category.name}
+                  </p>
+                  <h1 className="mt-1 text-[1.625rem] font-bold tracking-tight text-[var(--text-primary)] text-pretty sm:text-[2rem]">
+                    <span className="jp-keep">{service.name}</span>
+                  </h1>
+                  {metaAndActions}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-medium text-[var(--navy)]">
+                  {category.name}
+                </p>
+                <h1 className="mt-1 text-[1.625rem] font-bold tracking-tight text-[var(--text-primary)] text-pretty sm:text-[2rem]">
+                  <span className="jp-keep">{service.name}</span>
+                </h1>
+
+                {service.logo_url ? (
+                  <div className="mt-4 flex h-[125px] w-full items-center justify-center sm:hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- 詳細ヒーローの比率維持表示 */}
+                    <img
+                      src={service.logo_url}
+                      alt={`${service.name}のロゴ`}
+                      className="h-auto max-h-[125px] w-auto max-w-[340px] object-contain object-center"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </div>
+                ) : null}
+
+                {metaAndActions}
+              </div>
+
+              {service.logo_url ? (
+                <div className="hidden h-[140px] w-full max-w-[340px] shrink-0 items-center justify-center self-center sm:flex lg:self-start lg:pt-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 詳細ヒーローの比率維持表示 */}
+                  <img
+                    src={service.logo_url}
+                    alt={`${service.name}のロゴ`}
+                    className="h-auto max-h-[140px] w-auto max-w-[340px] object-contain object-center"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
               ) : null}
-              <Link
-                href={categoryPath(category.slug, "services")}
-                className={buttonClass("ghost", "md")}
-              >
-                一覧に戻る
-              </Link>
             </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
       {service.about_text?.trim() ? (

@@ -133,8 +133,8 @@ export async function saveBulkScrapingJobAction(input: {
   }
 
   revalidatePath("/admin");
-  revalidatePath("/admin/bulk-update");
-  revalidatePath("/admin/services");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/admin", "layout");
 
   return { ok: true, message: "更新履歴を保存しました。", jobId: data.id };
 }
