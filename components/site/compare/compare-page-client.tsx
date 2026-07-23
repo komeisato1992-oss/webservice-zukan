@@ -13,6 +13,7 @@ import {
 import {
   useComparePins,
 } from "@/components/site/compare/compare-pins";
+import { CompareTableNote } from "@/components/site/compare/compare-table-note";
 import { buttonClass, cn } from "@/components/site/ui";
 
 type ServiceOption = { slug: string; name: string };
@@ -222,7 +223,7 @@ export function ComparePageClient({
 
   return (
     <>
-      <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-white shadow-[var(--shadow-card)]">
+      <div className="mt-2.5 rounded-[var(--radius-card)] border border-[var(--border)] bg-white shadow-[var(--shadow-card)] sm:mt-3">
         <button
           type="button"
           onClick={() => setPickerOpen((v) => !v)}
@@ -384,7 +385,7 @@ export function ComparePageClient({
       </div>
 
       {selected.length === 0 ? (
-        <div className="mt-5 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center">
+        <div className="mt-3 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center sm:mt-4 sm:py-8">
           <p className="text-[13px] text-[var(--text-body)] text-pretty">
             比較するサービスを選択してください
           </p>
@@ -392,7 +393,7 @@ export function ComparePageClient({
             <button
               type="button"
               onClick={applyDefaults}
-              className={cn(buttonClass("primary", "md"), "mt-4")}
+              className={cn(buttonClass("primary", "md"), "mt-3 sm:mt-4")}
             >
               おすすめサービスを選択
             </button>
@@ -401,7 +402,7 @@ export function ComparePageClient({
       ) : null}
 
       {showNoFields ? (
-        <div className="mt-5 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-8 text-center">
+        <div className="mt-3 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center sm:mt-4 sm:py-8">
           <p className="text-[13px] text-[var(--text-body)] text-pretty">
             現在、表示可能な比較項目がありません。
           </p>
@@ -409,7 +410,8 @@ export function ComparePageClient({
       ) : null}
 
       {showTable ? (
-        <div ref={tableRef} className="mt-4 scroll-mt-24">
+        <div ref={tableRef} className="mt-3 scroll-mt-24 sm:mt-4">
+          <CompareTableNote className="mb-2.5" />
           <ComparisonTable
             categorySlug={categorySlug}
             services={selectedServices}

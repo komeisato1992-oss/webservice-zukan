@@ -7,11 +7,8 @@ import { buildPageMetadata } from "@/lib/site/seo";
 import { loadServerTopData } from "@/lib/site/public-data";
 import { getDefaultComparisonSlugs } from "@/lib/site/default-comparison-services";
 import { ComparePageClient } from "@/components/site/compare/compare-page-client";
-import { CompareTableNote } from "@/components/site/compare/compare-table-note";
-import { CompareIntroStats } from "@/components/site/compare/compare-intro-stats";
 import { DataUnavailable } from "@/components/site/data-unavailable";
 import { Breadcrumb } from "@/components/site/ui";
-import { buildCompareRows } from "@/lib/site/compare-rows";
 
 /** searchParams 利用のためページ自体は dynamic になり得るが、DB は unstable_cache 済み */
 export const revalidate = 300;
@@ -67,35 +64,20 @@ export default async function ComparePage({ params, searchParams }: Props) {
           .map((s) => s.trim())
           .filter(Boolean);
 
-  const serviceCount = data.allCount > 0 ? data.allCount : data.services.length;
-  const fieldCount = Math.max(
-    buildCompareRows(
-      data.services.slice(0, Math.min(3, data.services.length)),
-      data.comparisonFields,
-    ).length,
-    data.comparisonFields.length,
-    1,
-  );
-
   return (
-    <div className="mx-auto max-w-[var(--container-max)] px-3 py-5 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-[var(--container-max)] px-3 py-3 sm:px-6 sm:py-5">
       <Breadcrumb
         items={[
           { href: "/server", label: SITE_BRAND },
           { label: "比較" },
         ]}
       />
-      <h1 className="mt-2 text-[1.375rem] font-bold tracking-tight text-[var(--text-primary)] sm:mt-3 sm:text-[1.75rem]">
+      <h1 className="mt-1.5 text-[1.375rem] font-bold tracking-tight text-[var(--text-primary)] sm:mt-2 sm:text-[1.75rem]">
         レンタルサーバー比較
       </h1>
-      <p className="mt-1.5 text-[13px] leading-snug text-[var(--text-body)] sm:text-[14px]">
+      <p className="mt-1 text-[13px] leading-snug text-[var(--text-body)] sm:text-[14px]">
         料金・容量・機能をまとめて比較できます。複数プランがあるサービスは、プランを切り替えて確認できます。
-        {serviceCount > 0 ? `（掲載${serviceCount}サービス）` : ""}
       </p>
-
-      <CompareIntroStats serviceCount={serviceCount} fieldCount={fieldCount} />
-
-      <CompareTableNote className="mt-2.5" />
 
       <ComparePageClient
         categorySlug={categorySlug}
