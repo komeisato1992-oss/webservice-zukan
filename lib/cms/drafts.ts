@@ -21,7 +21,7 @@ function toJson(payload: ServiceDraftPayload): Json {
 }
 
 const SERVICE_DRAFT_COLUMNS =
-  "id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, suitable_beginner, suitable_blog, suitable_business, suitable_ec, adult_allowed, has_unpublished_changes, draft_updated_at, last_published_at, last_change_source, data_version, created_at, updated_at";
+  "id, category_id, name, slug, short_name, catchphrase, about_text, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, suitable_beginner, suitable_blog, suitable_business, suitable_ec, adult_allowed, has_unpublished_changes, draft_updated_at, last_published_at, last_change_source, data_version, created_at, updated_at";
 
 const PLAN_DRAFT_COLUMNS =
   "id, service_id, name, display_name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, storage_type, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, cpu, memory, transfer_amount, free_trial_days, free_domain_count, multi_domain_count, database_count, payment_methods, min_contract_period, field_overrides, publish_status, has_unpublished_changes, created_at, updated_at";
@@ -51,7 +51,7 @@ function asPayload(raw: unknown): ServiceDraftPayload {
 }
 
 const SERVICE_DRAFT_COLUMNS_LEGACY =
-  "id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, status, is_published, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, data_version, created_at, updated_at";
+  "id, category_id, name, slug, short_name, catchphrase, about_text, logo_url, thumbnail_url, official_url, primary_link_url, status, is_published, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, data_version, created_at, updated_at";
 
 const PLAN_DRAFT_COLUMNS_LEGACY =
   "id, service_id, name, slug, regular_monthly_price, campaign_monthly_price, effective_monthly_price, initial_fee, billing_period, storage_value, storage_unit, description, display_order, is_published, is_default_comparison_plan, is_recommended, official_url, created_at, updated_at";

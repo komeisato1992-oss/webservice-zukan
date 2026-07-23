@@ -65,8 +65,8 @@ export type Service = {
   slug: string;
   short_name: string | null;
   catchphrase: string | null;
-  summary: string | null;
-  description: string | null;
+  /** サービス詳細「〇〇とは」本文（一覧取得では省略可） */
+  about_text?: string | null;
   logo_url: string | null;
   thumbnail_url: string | null;
   official_url: string | null;
@@ -464,8 +464,7 @@ type Tables = {
       slug: string;
       short_name?: string | null;
       catchphrase?: string | null;
-      summary?: string | null;
-      description?: string | null;
+      about_text?: string | null;
       logo_url?: string | null;
       thumbnail_url?: string | null;
       official_url?: string | null;

@@ -92,8 +92,6 @@ async function main() {
     category_id: category.id,
     name: s.name,
     slug: s.slug,
-    summary: s.summary,
-    description: s.summary,
     official_url: s.officialUrl,
     status: "published" as const,
     display_order: s.displayOrder,

@@ -69,8 +69,7 @@ function hasKeyword(item: EnrichedService, keywords: string[]): boolean {
   const hay = [
     item.service.recommended_uses,
     item.service.catchphrase,
-    item.service.summary,
-    item.service.description,
+    item.service.about_text,
   ]
     .filter(Boolean)
     .join(" ");

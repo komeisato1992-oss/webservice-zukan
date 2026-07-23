@@ -55,9 +55,9 @@ export type ServerTopData = {
 const CATEGORY_PUBLIC_COLUMNS =
   "id, name, slug, description, icon, display_order, is_published, seo_title, seo_description, created_at, updated_at";
 
-/** TOP/比較用。長文 description / SEO 本文は一覧では載せない */
+/** TOP/比較用。長文 about_text / SEO 本文は一覧では載せない */
 const SERVICE_PUBLIC_COLUMNS =
-  "id, category_id, name, slug, short_name, catchphrase, summary, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, created_at, updated_at";
+  "id, category_id, name, slug, short_name, catchphrase, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, created_at, updated_at";
 
 /**
  * マイグレーション未適用時でも本サイトから隠す初期スラッグ
@@ -179,7 +179,7 @@ async function fetchServerTopDataInner(
       const withoutVisible = await supabase
         .from("services")
         .select(
-          `id, category_id, name, slug, short_name, catchphrase, summary, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, created_at, updated_at, affiliate_links(${AFFILIATE_PUBLIC_COLUMNS})`,
+          `id, category_id, name, slug, short_name, catchphrase, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_featured, display_order, editor_score, show_in_top_featured_comparison, show_in_top_comparison, top_featured_display_order, top_comparison_display_order, recommended_uses, created_at, updated_at, affiliate_links(${AFFILIATE_PUBLIC_COLUMNS})`,
         )
         .eq("category_id", category.id)
         .eq("is_published", true)
@@ -189,7 +189,7 @@ async function fetchServerTopDataInner(
         const legacy = await supabase
           .from("services")
           .select(
-            `id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, created_at, updated_at, affiliate_links(${AFFILIATE_PUBLIC_COLUMNS})`,
+            `id, category_id, name, slug, short_name, catchphrase, logo_url, thumbnail_url, official_url, primary_link_url, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, created_at, updated_at, affiliate_links(${AFFILIATE_PUBLIC_COLUMNS})`,
           )
           .eq("category_id", category.id)
           .eq("is_published", true)

@@ -801,6 +801,21 @@ function BasicSection({
           />
         </div>
         <div className="mt-3">
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            〇〇とは（説明文）
+          </label>
+          <textarea
+            value={String(serviceRow.about_text ?? "")}
+            onChange={(e) => onChange("about_text", e.target.value)}
+            rows={8}
+            className="min-h-40 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm leading-relaxed"
+            placeholder={`${String(serviceRow.name || "サービス名")}とは…`}
+          />
+          <p className="mt-1.5 text-xs text-slate-500">
+            サービス詳細ページの「{String(serviceRow.name || "サービス名")}とは」に表示されます。改行はそのまま反映されます。
+          </p>
+        </div>
+        <div className="mt-3">
           <label className="mb-1.5 block text-sm font-medium text-slate-700">カテゴリ</label>
           <select
             value={String(serviceRow.category_id ?? "")}

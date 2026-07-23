@@ -4,7 +4,7 @@ export type PurposeOption = {
   label: string;
   /** サービス一覧の ?purpose= やセクション id に使う */
   sectionId: string;
-  /** recommended_uses / catchphrase / summary に対するキーワード（部分一致） */
+  /** recommended_uses / catchphrase / about_text に対するキーワード（部分一致） */
   keywords: string[];
   description: string;
 };

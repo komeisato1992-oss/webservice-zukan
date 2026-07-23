@@ -56,8 +56,7 @@ export function ServiceCard({
       : null;
   const tags = featureTags.slice(0, 3);
   const suitedFor = service.recommended_uses?.trim() || null;
-  const shortFeature =
-    service.catchphrase?.trim() || service.summary?.trim() || null;
+  const shortFeature = service.catchphrase?.trim() || null;
   const showRank = rank != null && rank >= 1 && rank <= 3;
 
   return (

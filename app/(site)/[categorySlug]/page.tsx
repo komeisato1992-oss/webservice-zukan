@@ -128,7 +128,7 @@ export default async function CategoryHomePage({ params }: Props) {
       const { data: serviceRows, error: servicesError } = await supabase
         .from("services")
         .select(
-          "id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
+          "id, category_id, name, slug, short_name, catchphrase, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
         )
         .eq("category_id", category.id)
         .eq("is_published", true)

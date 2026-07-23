@@ -102,7 +102,7 @@ export const loadPublishedRankings = cache(
           supabase
             .from("services")
             .select(
-              "id, category_id, name, slug, short_name, catchphrase, summary, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, recommended_uses, created_at, updated_at",
+              "id, category_id, name, slug, short_name, catchphrase, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, recommended_uses, created_at, updated_at",
             )
             .in("id", serviceIds),
           supabase

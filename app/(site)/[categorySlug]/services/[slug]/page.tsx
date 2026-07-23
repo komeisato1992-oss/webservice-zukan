@@ -150,7 +150,7 @@ export default async function ServiceDetailPage({ params }: Props) {
   let serviceRes = await supabase
     .from("services")
     .select(
-      "id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
+      "id, category_id, name, slug, short_name, catchphrase, about_text, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_site_visible, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
     )
     .eq("category_id", category.id)
     .eq("slug", slug)
@@ -161,7 +161,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     serviceRes = await supabase
       .from("services")
       .select(
-        "id, category_id, name, slug, short_name, catchphrase, summary, description, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
+        "id, category_id, name, slug, short_name, catchphrase, about_text, logo_url, thumbnail_url, official_url, primary_link_url, affiliate_url, affiliate_network, affiliate_status, status, is_published, is_featured, display_order, editor_score, recommended_uses, seo_title, seo_description, canonical_url, og_image_url, company_name, service_start_year, datacenter_location, editor_comment, overall_score, created_at, updated_at, affiliate_links(id, service_id, asp_name, program_name, official_url, affiliate_url, approval_status, is_primary, is_active)",
       )
       .eq("category_id", category.id)
       .eq("slug", slug)
@@ -354,20 +354,13 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {service.summary ? (
+      {service.about_text?.trim() ? (
         <section className="mt-8">
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">概要</h2>
-          <p className="mt-3 whitespace-pre-wrap leading-relaxed text-[var(--text-body)]">
-            {service.summary}
-          </p>
-        </section>
-      ) : null}
-
-      {service.description ? (
-        <section className="mt-8">
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">詳細</h2>
+          <h2 className="text-xl font-bold text-[var(--text-primary)]">
+            {service.name}とは
+          </h2>
           <div className="mt-3 whitespace-pre-wrap leading-relaxed text-[var(--text-body)]">
-            {service.description}
+            {service.about_text}
           </div>
         </section>
       ) : null}

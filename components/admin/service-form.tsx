@@ -93,7 +93,7 @@ export function ServiceForm({
     slug: service?.slug ?? "",
     short_name: service?.short_name ?? "",
     catchphrase: service?.catchphrase ?? "",
-    summary: service?.summary ?? "",
+    about_text: service?.about_text ?? "",
     recommended_uses: service?.recommended_uses ?? "",
     official_url: service?.official_url ?? affiliate?.official_url ?? "",
     category_id: service?.category_id ?? categories[0]?.id ?? "",
@@ -120,7 +120,7 @@ export function ServiceForm({
       slug: preset.slug,
       short_name: preset.shortName ?? "",
       catchphrase: preset.catchphrase ?? "",
-      summary: preset.summary,
+      about_text: "",
       recommended_uses: preset.recommendedUses ?? "",
       official_url: preset.officialUrl,
       category_id: categoryId,
@@ -375,16 +375,11 @@ export function ServiceForm({
             defaultValue={seed.catchphrase}
           />
           <Field
-            label="短い説明"
-            name="summary"
-            defaultValue={seed.summary}
+            label="〇〇とは（説明文）"
+            name="about_text"
+            defaultValue={seed.about_text}
             as="textarea"
-          />
-          <Field
-            label="詳細説明"
-            name="description"
-            defaultValue={service?.description ?? ""}
-            as="textarea"
+            hint="サービス詳細ページの「サービス名とは」セクションに表示されます"
           />
           <Field
             label="おすすめ用途"

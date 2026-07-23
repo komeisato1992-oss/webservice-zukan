@@ -28,7 +28,7 @@ export type EnrichedService = {
 };
 
 function textHaystack(service: Service): string {
-  return [service.recommended_uses, service.catchphrase, service.summary, service.description]
+  return [service.recommended_uses, service.catchphrase, service.about_text]
     .filter(Boolean)
     .join("\n")
     .toLowerCase();
