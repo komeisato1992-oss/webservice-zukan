@@ -37,7 +37,7 @@ function purposeIdFromHash(hash: string): string | null {
 }
 
 export function PurposeSelectionProvider({ children }: { children: ReactNode }) {
-  const [activeId, setActiveIdState] = useState<string | null>(null);
+  const [activeId, setActiveIdState] = useState<string | null>("beginner");
   const [pendingScroll, setPendingScroll] = useState(false);
   const rankingRef = useRef<HTMLDivElement | null>(null);
   const skipHashWrite = useRef(false);

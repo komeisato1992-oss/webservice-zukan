@@ -16,10 +16,7 @@ import {
   SERVER_FAQS,
 } from "@/lib/site/content";
 import { CompareCategoryNav } from "@/components/site/compare-category-nav";
-import {
-  filterServicesByPurpose,
-  type ServerTopData,
-} from "@/lib/site/public-data";
+import type { ServerTopData } from "@/lib/site/public-data";
 import { buildCompareRows } from "@/lib/site/compare-rows";
 import { SITE_BRAND } from "@/lib/site/brand";
 import { categoryPath } from "@/lib/links";
@@ -71,11 +68,6 @@ export function ServerTopPage({
     topComparisonServices,
   } = data;
   const categorySlug = category.slug;
-
-  const purposeCounts: Record<string, number> = {};
-  for (const opt of PURPOSE_OPTIONS) {
-    purposeCounts[opt.id] = filterServicesByPurpose(services, opt.id).length;
-  }
 
   const allSlugs = services.map((s) => s.service.slug);
   const heroServices = featuredComparisonServices;
@@ -239,14 +231,11 @@ export function ServerTopPage({
       >
         <SectionHeader
           title="重視したい条件から探す"
-          description="気になる条件を選ぶと、同じ画面でおすすめサービスを確認できます。"
+          description="条件を選ぶと、編集部おすすめのランキングがその場で切り替わります。"
           className="!mb-0"
         />
         <PurposePicker
           options={PURPOSE_OPTIONS}
-          counts={purposeCounts}
-          services={services}
-          fields={comparisonFields}
           categorySlug={categorySlug}
           managedRankings={managedRankings}
         />

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import Link from "next/link";
 import {
   Building2,
   Database,
@@ -19,18 +18,10 @@ import {
   PURPOSE_RANKING_TITLES,
   type PurposeOption,
 } from "@/lib/site/content";
-import { formatPlanLabelFromPlan } from "@/lib/site/service-name-display";
-import type { ComparisonField } from "@/lib/types/database";
-import type { EnrichedService } from "@/lib/site/service-utils";
-import { recommendServicesForPurpose } from "@/lib/site/purpose-recommend";
 import type { ManagedRankingSet } from "@/lib/site/rankings-public";
-import { categoryPath, resolveOutboundLink } from "@/lib/links";
 import { usePurposeSelection } from "@/components/site/purpose-selection-context";
-import { AddToCompareButton } from "@/components/site/compare/add-to-compare-button";
-import { OfficialSiteButton } from "@/components/site/official-site-button";
-import { RankCornerBadge } from "@/components/site/site-badge";
-import { ServiceLogo } from "@/components/site/service-logo";
-import { buttonClass, cn, ICON_SM } from "@/components/site/ui";
+import { RankingCard } from "@/components/site/ranking-card";
+import { cn } from "@/components/site/ui";
 
 const PURPOSE_ICONS: Record<string, LucideIcon> = {
   beginner: Sparkles,
@@ -45,101 +36,48 @@ const PURPOSE_ICONS: Record<string, LucideIcon> = {
   storage: Database,
 };
 
+const DEFAULT_PURPOSE_ID = "beginner";
+
 type Props = {
   options: PurposeOption[];
-  services: EnrichedService[];
-  fields: ComparisonField[];
   categorySlug: string;
-  counts?: Record<string, number>;
-  /** 管理画面で公開されたランキング（あれば自動選定より優先） */
+  /** 管理画面「ランキング管理」の公開データ */
   managedRankings?: Record<string, ManagedRankingSet>;
 };
 
 export function PurposePicker({
   options,
-  services,
-  fields,
   categorySlug,
-  counts = {},
   managedRankings = {},
 }: Props) {
-  const {
-    activeId,
-    setActiveId,
-    rankingRef,
-    pendingScroll,
-    clearPendingScroll,
-    scrollToRanking,
-  } = usePurposeSelection();
+  const { activeId, setActiveId, rankingRef } = usePurposeSelection();
 
-  const managed = activeId ? managedRankings[activeId] : null;
-  const recommendations = useMemo(() => {
-    if (!activeId) return null;
-    if (managed && managed.items.length > 0) {
-      return {
-        purposeId: activeId,
-        items: managed.items.map((card) => {
-          const enriched = services.find((s) => s.service.id === card.service.id);
-          return {
-            item:
-              enriched ??
-              ({
-                service: card.service,
-                affiliateLinks: card.affiliateLinks,
-                plans: [],
-                representativePlan: null,
-                comparisonByFieldId: {},
-                comparisonByPlanId: {},
-                campaigns: [],
-                highlightLabels: [],
-              } as EnrichedService),
-            reason: card.cardComment || "管理画面で選定されたおすすめサービスです。",
-            metrics: [
-              { label: "月額", value: card.monthlyLabel },
-              { label: "容量", value: card.storageLabel },
-            ],
-            planNameOverride: card.planName,
-          };
-        }),
-      };
-    }
-    const auto = recommendServicesForPurpose(activeId, services, fields);
-    if (!auto) return null;
-    return {
-      ...auto,
-      items: auto.items.map((i) => ({
-        ...i,
-        planNameOverride: null as string | null,
-      })),
-    };
-  }, [activeId, managed, services, fields]);
+  // デフォルトは「初心者向け」（ハッシュ未指定時）
+  useEffect(() => {
+    if (activeId) return;
+    setActiveId(DEFAULT_PURPOSE_ID, { scroll: false });
+  }, [activeId, setActiveId]);
+
+  const selectedId = activeId ?? DEFAULT_PURPOSE_ID;
+
+  const items = useMemo(() => {
+    const set = managedRankings[selectedId];
+    return (set?.items ?? [])
+      .filter((c) => c.rank >= 1 && c.rank <= 3)
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, 3);
+  }, [managedRankings, selectedId]);
 
   const rankingTitle =
-    (activeId && PURPOSE_RANKING_TITLES[activeId]) ||
-    (activeId
-      ? `${options.find((o) => o.id === activeId)?.label ?? ""}ランキング`
-      : "");
-
-  // ランキング DOM が載ったあとにスクロール（即時 scroll だと ref が null）
-  useEffect(() => {
-    if (!pendingScroll || !activeId || !recommendations) return;
-    scrollToRanking();
-    clearPendingScroll();
-  }, [
-    pendingScroll,
-    activeId,
-    recommendations,
-    scrollToRanking,
-    clearPendingScroll,
-  ]);
+    PURPOSE_RANKING_TITLES[selectedId] ||
+    `${options.find((o) => o.id === selectedId)?.label ?? ""}ランキング`;
 
   return (
     <div className="relative z-20 isolate mt-3 sm:mt-3.5">
-      <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:grid-cols-4 lg:grid-cols-5">
         {options.map((option) => {
           const Icon = PURPOSE_ICONS[option.id] ?? Sparkles;
-          const count = counts[option.id] ?? 0;
-          const active = activeId === option.id;
+          const active = selectedId === option.id;
           return (
             <button
               key={option.id}
@@ -148,162 +86,86 @@ export function PurposePicker({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // 同じ条件でも解除せず、ランキング再表示＋スクロール
-                setActiveId(option.id, { scroll: true });
+                // スクロール位置は維持したままランキングだけ切替
+                setActiveId(option.id, { scroll: false });
               }}
               className={cn(
-                "group relative z-20 flex min-h-[7.5rem] cursor-pointer touch-manipulation flex-col gap-1.5 rounded-[var(--radius-card)] border px-3 py-3 text-left transition duration-150 sm:min-h-[8rem] sm:px-3.5 sm:py-3.5 scroll-mt-28 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35",
-                "active:bg-[var(--surface-navy-tint)]/80",
+                "group relative z-20 flex cursor-pointer touch-manipulation flex-col gap-0 rounded-[var(--radius-card)] border px-2 py-1.5 text-left transition duration-150 sm:px-2.5 sm:py-2 scroll-mt-28",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35",
                 active
-                  ? "border-[var(--navy)] bg-white shadow-sm ring-1 ring-[var(--navy)]/15"
-                  : "border-[var(--border)] bg-white hover:border-[var(--navy)]/30 hover:bg-[var(--surface)]",
+                  ? "border-[var(--navy)] bg-[var(--navy)] text-white shadow-sm"
+                  : "border-[var(--border)] bg-white text-[var(--text-primary)] hover:-translate-y-0.5 hover:border-[var(--navy)] hover:shadow-sm",
               )}
               aria-pressed={active}
-              aria-label={`${option.label}${count > 0 ? `（${count}件）` : ""}`}
+              aria-label={option.label}
             >
-              <div className="pointer-events-none flex items-center justify-between gap-2">
-                <span
-                  className={cn(
-                    "inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--navy)] transition duration-150",
-                    active
-                      ? "bg-[var(--navy)] text-white"
-                      : "bg-[var(--surface-navy-tint)]",
-                  )}
-                >
-                  <Icon size={ICON_SM} strokeWidth={1.75} aria-hidden />
-                </span>
-                {count > 0 ? (
-                  <span className="text-[12px] tabular-nums text-[var(--text-muted)]">
-                    {count}件
-                  </span>
-                ) : (
-                  <span className="text-[12px] text-[var(--text-muted)]">
-                    準備中
-                  </span>
+              <span
+                className={cn(
+                  "mb-0.5 inline-flex h-4 w-4 items-center justify-center rounded transition duration-150 sm:h-5 sm:w-5",
+                  active
+                    ? "bg-white/15 text-white"
+                    : "bg-[var(--surface-navy-tint)] text-[var(--navy)]",
                 )}
-              </div>
-              <div className="pointer-events-none">
-                <p className="text-[14px] font-semibold leading-snug text-[var(--text-primary)] sm:text-[15px]">
-                  {option.label}
-                </p>
-                <p className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[var(--text-muted)] sm:text-[13px]">
-                  {option.description}
-                </p>
-              </div>
+              >
+                <Icon size={11} strokeWidth={1.75} aria-hidden />
+              </span>
+              <p
+                className={cn(
+                  "text-[13px] font-bold leading-tight sm:text-[14px]",
+                  active ? "text-white" : "text-[var(--text-primary)]",
+                )}
+              >
+                {option.label}
+              </p>
+              <p
+                className={cn(
+                  "mt-0.5 line-clamp-1 text-[11px] leading-tight sm:text-[12px]",
+                  active ? "text-white/80" : "text-[var(--text-muted)]",
+                )}
+              >
+                {option.description}
+              </p>
             </button>
           );
         })}
       </div>
 
-      {recommendations ? (
+      <div
+        ref={rankingRef}
+        className="mt-4 scroll-mt-28 border-t border-[var(--border)] pt-4 sm:mt-5 sm:pt-5"
+      >
+        <h3 className="text-[15px] font-bold text-[var(--text-primary)] sm:text-base">
+          {rankingTitle}
+        </h3>
         <div
-          ref={rankingRef}
-          className="ui-fade-in mt-4 scroll-mt-28 border-t border-[var(--border)] pt-4 sm:mt-5 sm:pt-5"
+          key={selectedId}
+          className="ui-fade-in mt-3"
+          style={{ animationDuration: "200ms" }}
         >
-          <h3 className="text-[15px] font-bold text-[var(--text-primary)] sm:text-base">
-            {rankingTitle}
-          </h3>
-          {recommendations.items.length === 0 ? (
-            <p className="mt-3 text-sm text-[var(--text-body)]">
-              条件に合う公開データがまだありません。比較表から確認してください。
+          {items.length === 0 ? (
+            <p className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center text-sm text-[var(--text-body)]">
+              この条件のランキングはまだ登録されていません。管理画面のランキング管理から設定できます。
             </p>
           ) : (
-            <ul className="mt-3 grid gap-3 sm:grid-cols-3">
-              {recommendations.items.map((rec, index) => {
-                const s = rec.item.service;
-                const plan = rec.item.representativePlan;
-                const detailHref = categoryPath(
-                  categorySlug,
-                  "services",
-                  s.slug,
-                );
-                const outbound = resolveOutboundLink(
-                  s,
-                  rec.item.affiliateLinks,
-                );
-                const rank = index + 1;
-                const planLabel =
-                  ("planNameOverride" in rec && rec.planNameOverride) ||
-                  formatPlanLabelFromPlan(plan);
-                return (
-                  <li
-                    key={s.id}
-                    className="relative flex flex-col rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-150 hover:shadow-[var(--shadow-card-hover)]"
-                  >
-                    <RankCornerBadge
-                      rank={rank}
-                      className="absolute left-2.5 top-2.5"
-                    />
-                    <div className="flex items-start gap-2.5 pt-1">
-                      <div className="min-w-0 flex-1 pl-8">
-                        <div className="flex items-center gap-2">
-                          <ServiceLogo
-                            name={s.name}
-                            logoUrl={s.logo_url}
-                            size="sm"
-                            fallback="none"
-                          />
-                          <div className="min-w-0">
-                            <p className="break-words text-[14px] font-bold text-[var(--text-primary)]">
-                              <span className="jp-break">{s.name}</span>
-                            </p>
-                            {planLabel ? (
-                              <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
-                                {planLabel}
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
-                        <p className="mt-2 text-[12px] leading-relaxed text-[var(--text-body)]">
-                          {rec.reason}
-                        </p>
-                        <dl className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
-                          {rec.metrics.map((m) => (
-                            <div key={m.label} className="flex gap-1">
-                              <dt className="text-[var(--text-muted)]">
-                                {m.label}
-                              </dt>
-                              <dd className="font-medium text-[var(--text-primary)]">
-                                {m.value}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-                    </div>
-                    <div className="mt-auto flex flex-col gap-1.5 pt-3">
-                      <AddToCompareButton
-                        slug={s.slug}
-                        name={s.name}
-                        categorySlug={categorySlug}
-                        emphasis="primary"
-                      />
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={detailHref}
-                          className={`${buttonClass("secondary", "sm")} flex-1`}
-                        >
-                          詳細を見る
-                        </Link>
-                        {outbound ? (
-                          <OfficialSiteButton
-                            href={outbound.href}
-                            isAffiliate={outbound.isAffiliate}
-                            label="公式"
-                            size="sm"
-                            fullWidth={false}
-                            className="min-w-[5.5rem] px-2"
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
+            <ul
+              className={cn(
+                "scroll-row flex gap-3 overflow-x-auto pb-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:pb-0",
+                "snap-x snap-mandatory sm:snap-none",
+                "pr-6 sm:pr-0",
+              )}
+            >
+              {items.map((card) => (
+                <li
+                  key={`${card.purposeId}-${card.rank}-${card.service.id}`}
+                  className="snap-start sm:min-w-0"
+                >
+                  <RankingCard card={card} categorySlug={categorySlug} />
+                </li>
+              ))}
             </ul>
           )}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }
