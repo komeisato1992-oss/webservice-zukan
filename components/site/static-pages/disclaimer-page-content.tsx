@@ -1,16 +1,14 @@
-import { SITE_BRAND } from "@/lib/site/brand";
-import { buildPageMetadata } from "@/lib/site/seo";
+import type { DictionarySiteProfile } from "@/lib/site/dictionary-static-pages";
 import { InfoCallout } from "@/components/site/ui";
-import {
-  StaticPageShell,
-  StaticSection,
-} from "@/components/site/static-page-shell";
+import { StaticSection } from "@/components/site/static-page-shell";
 
-export const metadata = buildPageMetadata("disclaimer");
+type Props = {
+  profile: DictionarySiteProfile;
+};
 
-export default function DisclaimerPage() {
+export function DisclaimerPageContent({ profile }: Props) {
   return (
-    <StaticPageShell title="免責事項" path="/disclaimer">
+    <>
       <InfoCallout
         title="必ずご確認ください"
         items={[
@@ -21,7 +19,7 @@ export default function DisclaimerPage() {
 
       <StaticSection title="情報の正確性">
         <p>
-          {SITE_BRAND}
+          {profile.brand}
           に掲載する情報は、各サービスの公式情報などを基に整理・掲載していますが、その正確性・完全性・最新性を保証するものではありません。
         </p>
       </StaticSection>
@@ -61,6 +59,6 @@ export default function DisclaimerPage() {
           当サイトからリンクする外部サイトの内容・安全性・プライバシー方針等について、当サイト運営者は責任を負いません。外部サイトのご利用は、各サイトの利用規約・ポリシーに従ってください。
         </p>
       </StaticSection>
-    </StaticPageShell>
+    </>
   );
 }

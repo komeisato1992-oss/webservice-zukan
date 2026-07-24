@@ -43,28 +43,34 @@ export const PAGE_META = {
     path: "/server/compare",
   },
   about: {
+    title: "サイト情報",
+    description:
+      "サーバー図鑑のサイト情報です。レンタルサーバー比較サイトとして、料金・容量・機能・サポートを比較・整理しています。",
+    path: "/server/about",
+  },
+  operator: {
     title: "運営者情報",
     description:
-      "サーバー図鑑の運営者情報ページです。レンタルサーバー各社の料金・容量・機能・サポートを整理し比較しやすく提供する情報サイトの概要と、運営目的、情報取得方針、更新方針、お問い合わせへのご案内を掲載しています。",
-    path: "/about",
+      "サーバー図鑑の運営者情報ページです。運営目的、情報取得方針、更新方針、お問い合わせへのご案内を掲載しています。",
+    path: "/server/operator",
   },
   privacy: {
     title: "プライバシーポリシー",
     description:
       "サーバー図鑑のプライバシーポリシーです。アクセス解析やCookie、Google Analytics・Search Console、広告配信・アフィリエイト、お問い合わせで取得する情報の種類、利用目的、第三者提供、ポリシー変更について定めています。",
-    path: "/privacy",
+    path: "/server/privacy",
   },
   disclaimer: {
     title: "免責事項",
     description:
       "サーバー図鑑の免責事項です。掲載情報の正確性、料金・キャンペーン・仕様変更時は公式サイトを優先すること、損害責任および外部サイトへのリンクに関する考え方を明示しています。必ず最新情報をご確認ください。",
-    path: "/disclaimer",
+    path: "/server/disclaimer",
   },
   contact: {
     title: "お問い合わせ",
     description:
       "サーバー図鑑へのお問い合わせフォームです。掲載内容の修正依頼やご質問など、お名前・メールアドレス・お問い合わせ種別・内容をご記入のうえ送信できます。いただいた内容は運営への連絡にのみ利用します。",
-    path: "/contact",
+    path: "/server/contact",
   },
 } as const;
 

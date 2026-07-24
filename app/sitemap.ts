@@ -4,6 +4,7 @@ import { listDomainBeginnerArticleSlugs } from "@/lib/domain-articles/registry";
 import { listGuides } from "@/lib/guides/registry";
 import { PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
 import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
+import { listDictionaryStaticSitemapPaths } from "@/lib/site/dictionary-static-pages";
 import { PAGE_META, getSiteUrl } from "@/lib/site/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import {
@@ -62,30 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    {
-      url: `${siteUrl}${PAGE_META.about.path}`,
+    ...listDictionaryStaticSitemapPaths().map((path) => ({
+      url: `${siteUrl}${path}`,
       lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-    {
-      url: `${siteUrl}${PAGE_META.privacy.path}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}${PAGE_META.disclaimer.path}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${siteUrl}${PAGE_META.contact.path}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
+      changeFrequency: "monthly" as const,
+      priority: path.endsWith("/about") || path.endsWith("/contact") ? 0.4 : 0.3,
+    })),
     ...guideEntries,
   ];
 

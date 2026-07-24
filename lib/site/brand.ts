@@ -36,10 +36,11 @@ export const SITE_FOOTER_GROUPS = [
   {
     title: "サイト情報",
     links: [
-      { href: "/about", label: "運営者情報" },
-      { href: "/privacy", label: "プライバシーポリシー" },
-      { href: "/disclaimer", label: "免責事項" },
-      { href: "/contact", label: "お問い合わせ" },
+      { href: "/server/about", label: "サイト情報" },
+      { href: "/server/operator", label: "運営者情報" },
+      { href: "/server/privacy", label: "プライバシーポリシー" },
+      { href: "/server/disclaimer", label: "免責事項" },
+      { href: "/server/contact", label: "お問い合わせ" },
     ],
   },
 ] as const;

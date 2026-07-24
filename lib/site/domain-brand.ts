@@ -38,10 +38,11 @@ export const DOMAIN_FOOTER_GROUPS = [
   {
     title: "サイト情報",
     links: [
-      { href: "/about", label: "運営者情報" },
-      { href: "/privacy", label: "プライバシーポリシー" },
-      { href: "/disclaimer", label: "免責事項" },
-      { href: "/contact", label: "お問い合わせ" },
+      { href: "/domain/about", label: "サイト情報" },
+      { href: "/domain/operator", label: "運営者情報" },
+      { href: "/domain/privacy", label: "プライバシーポリシー" },
+      { href: "/domain/disclaimer", label: "免責事項" },
+      { href: "/domain/contact", label: "お問い合わせ" },
     ],
   },
 ] as const;

@@ -91,6 +91,7 @@ export const RESERVED_PATH_SEGMENTS = new Set([
   "articles",
   "guides",
   "about",
+  "operator",
   "privacy",
   "contact",
   "disclaimer",

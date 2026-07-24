@@ -1,20 +1,24 @@
 import Link from "next/link";
-import { SITE_BRAND } from "@/lib/site/brand";
 import { Breadcrumb, buttonClass } from "@/components/site/ui";
 
 export function StaticPageShell({
   title,
+  brand,
+  homePath,
   children,
 }: {
   title: string;
-  path: string;
+  /** @deprecated path は SEO 側で管理。互換のため残す */
+  path?: string;
+  brand: string;
+  homePath: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <Breadcrumb
         items={[
-          { href: "/server", label: SITE_BRAND },
+          { href: homePath, label: brand },
           { label: title },
         ]}
       />
@@ -25,7 +29,7 @@ export function StaticPageShell({
         {children}
       </div>
       <div className="mt-8">
-        <Link href="/server" className={buttonClass("secondary", "md")}>
+        <Link href={homePath} className={buttonClass("secondary", "md")}>
           TOPへ戻る
         </Link>
       </div>

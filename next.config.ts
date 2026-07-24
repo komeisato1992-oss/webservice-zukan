@@ -34,6 +34,27 @@ const nextConfig: NextConfig = {
         destination: "/server",
         permanent: true,
       },
+      // 旧ルートの情報ページ → サーバー図鑑配下へ
+      {
+        source: "/about",
+        destination: "/server/operator",
+        permanent: true,
+      },
+      {
+        source: "/privacy",
+        destination: "/server/privacy",
+        permanent: true,
+      },
+      {
+        source: "/disclaimer",
+        destination: "/server/disclaimer",
+        permanent: true,
+      },
+      {
+        source: "/contact",
+        destination: "/server/contact",
+        permanent: true,
+      },
       // Legacy admin URLs → サーバー図鑑配下
       {
         source: "/admin/services",

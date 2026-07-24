@@ -1,15 +1,9 @@
-import { buildPageMetadata } from "@/lib/site/seo";
 import { ContactForm } from "@/components/site/contact-form";
-import {
-  StaticPageShell,
-  StaticSection,
-} from "@/components/site/static-page-shell";
+import { StaticSection } from "@/components/site/static-page-shell";
 
-export const metadata = buildPageMetadata("contact");
-
-export default function ContactPage() {
+export function ContactPageContent() {
   return (
-    <StaticPageShell title="お問い合わせ" path="/contact">
+    <>
       <StaticSection title="ご連絡の前に">
         <p>
           掲載情報の修正依頼やご質問などは、以下のフォームよりお送りください。送信ボタンを押すとメールアプリが起動します。
@@ -19,6 +13,6 @@ export default function ContactPage() {
         </p>
       </StaticSection>
       <ContactForm />
-    </StaticPageShell>
+    </>
   );
 }
