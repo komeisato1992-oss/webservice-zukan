@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logoUrlUpdateFragment } from "@/lib/admin/logo-url";
 import { requireAdmin } from "@/lib/auth";
 import { isReservedPathSegment } from "@/lib/links";
 import { revalidatePublicSiteCache } from "@/lib/site/cache";
@@ -237,15 +238,24 @@ export async function saveServiceAction(
   const dictionaryId = formString(formData, "dictionary_id");
   const dictionarySlug =
     formString(formData, "dictionary_slug") || "server";
+  const clearLogo = formBoolean(formData, "clear_logo");
 
   if (!id && !dictionaryId) {
     return { ok: false, message: "図鑑が指定されていません。" };
   }
 
+  const { logo_url: _parsedLogoUrl, ...parsedWithoutLogo } = parsed.data;
+  const logoPatch = logoUrlUpdateFragment(formString(formData, "logo_url"), {
+    clearLogo,
+  });
+
   const servicePayload = {
-    ...parsed.data,
+    ...parsedWithoutLogo,
     primary_link_url: parsed.data.affiliate_url,
     ...(dictionaryId ? { dictionary_id: dictionaryId } : {}),
+    ...logoPatch,
+    // 新規作成時のみ、未入力は null として保存する
+    ...(!id && !("logo_url" in logoPatch) ? { logo_url: null as string | null } : {}),
   };
 
   let serviceId = id;

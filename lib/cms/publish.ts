@@ -1,4 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  CLEAR_LOGO_URL_KEY,
+  omitBlankLogoUrlFromPatch,
+} from "@/lib/admin/logo-url";
 import type { Database, Json } from "@/lib/types/database";
 import { AFFECTED_PAGE_LABELS, type ServiceDraftPayload } from "@/lib/cms/types";
 import { ensureServiceDraft } from "@/lib/cms/drafts";
@@ -137,7 +141,10 @@ function pickColumns(
 }
 
 function pickServiceColumns(service: Record<string, unknown>) {
-  return pickColumns(service, SERVICE_LIVE_COLUMNS);
+  const clearLogo = service[CLEAR_LOGO_URL_KEY] === true;
+  return omitBlankLogoUrlFromPatch(pickColumns(service, SERVICE_LIVE_COLUMNS), {
+    clearLogo,
+  });
 }
 
 function pickPlanColumns(plan: Record<string, unknown>) {
@@ -462,11 +469,18 @@ export async function publishServiceDraft(
       .in("status", ["draft", "pending_review"])
       .eq("selected_for_publish", true);
 
+    const snapshotService = { ...draft.payload.service };
+    delete snapshotService[CLEAR_LOGO_URL_KEY];
+    const snapshotPayload = {
+      ...draft.payload,
+      service: snapshotService,
+    };
+
     await supabase
       .from("cms_service_drafts")
       .update({
-        published_snapshot: draft.payload as unknown as Json,
-        payload: draft.payload as unknown as Json,
+        published_snapshot: snapshotPayload as unknown as Json,
+        payload: snapshotPayload as unknown as Json,
         status: "published",
         change_count: 0,
       })

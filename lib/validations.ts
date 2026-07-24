@@ -8,6 +8,25 @@ const optionalUrl = z
   .optional()
   .transform((v) => (v ? v : null));
 
+/** ロゴは https URL またはサイト内相対パス（/logos/...）を許可。空は null（更新時は別途 omit）。 */
+const optionalLogoUrl = z
+  .string()
+  .trim()
+  .optional()
+  .refine(
+    (v) => {
+      if (v == null || v === "") return true;
+      if (v.startsWith("/") && !v.startsWith("//")) return true;
+      try {
+        return Boolean(new URL(v));
+      } catch {
+        return false;
+      }
+    },
+    "正しいURLまたは / から始まるパスを入力してください",
+  )
+  .transform((v) => (v ? v : null));
+
 const optionalText = z
   .string()
   .trim()
@@ -66,7 +85,7 @@ export const serviceSchema = z.object({
   short_name: optionalText,
   catchphrase: optionalText,
   about_text: optionalText,
-  logo_url: optionalUrl,
+  logo_url: optionalLogoUrl,
   thumbnail_url: optionalUrl,
   official_url: optionalUrl,
   affiliate_url: optionalHttpsUrl,

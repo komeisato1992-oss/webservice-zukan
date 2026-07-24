@@ -27,6 +27,7 @@ import { MobileActionBar } from "@/components/admin/cms/mobile-action-bar";
 import { SectionAccordion } from "@/components/admin/cms/section-accordion";
 import { StatusBadge, type CmsBadgeStatus } from "@/components/admin/cms/status-badge";
 import { ScrapingCandidatesPanel } from "@/components/admin/cms/scraping-candidates-panel";
+import { CLEAR_LOGO_URL_KEY } from "@/lib/admin/logo-url";
 import {
   createDraftPlan,
   duplicateDraftPlan,
@@ -664,11 +665,14 @@ function UrlField({
   value,
   onChange,
   hint,
+  inputType = "url",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   hint?: string;
+  /** 相対パス（/logos/...）も扱う場合は text を指定 */
+  inputType?: "url" | "text";
 }) {
   const href = value ? safeExternalHref(value) : null;
   return (
@@ -676,10 +680,10 @@ function UrlField({
       <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
       <div className="flex gap-2">
         <input
-          type="url"
+          type={inputType}
           inputMode="url"
           value={value}
-          placeholder="https://..."
+          placeholder={inputType === "url" ? "https://..." : "https://... または /logos/..."}
           onChange={(e) => onChange(e.target.value)}
           className="h-11 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm"
         />
@@ -796,11 +800,35 @@ function BasicSection({
               ))}
             </select>
           </div>
-          <UrlField
-            label="ロゴURL"
-            value={String(serviceRow.logo_url ?? "")}
-            onChange={(v) => onChange("logo_url", v)}
-          />
+          <div className="sm:col-span-2 space-y-2">
+            <UrlField
+              label="ロゴURL"
+              inputType="text"
+              value={String(serviceRow.logo_url ?? "")}
+              onChange={(v) => {
+                onChange("logo_url", v);
+                onChange(CLEAR_LOGO_URL_KEY, false);
+              }}
+              hint="空のまま保存しても既存のロゴは保持されます。削除する場合は下のボタンを使ってください。"
+            />
+            {serviceRow.logo_url || serviceRow[CLEAR_LOGO_URL_KEY] === true ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onChange("logo_url", "");
+                  onChange(CLEAR_LOGO_URL_KEY, true);
+                }}
+                className="text-sm font-medium text-rose-700 hover:underline"
+              >
+                ロゴを削除
+              </button>
+            ) : null}
+            {serviceRow[CLEAR_LOGO_URL_KEY] === true ? (
+              <p className="text-xs text-rose-600">
+                公開時にロゴが削除されます（下書き保存後に公開してください）
+              </p>
+            ) : null}
+          </div>
           <TextField
             label="データセンター所在地"
             value={String(serviceRow.datacenter_location ?? "")}

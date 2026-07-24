@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { ActionResult } from "@/lib/actions/admin";
+import { logoUrlUpdateFragment } from "@/lib/admin/logo-url";
 import { requireAdmin } from "@/lib/auth";
 import { isReservedPathSegment } from "@/lib/links";
-import type { ActionResult } from "@/lib/actions/admin";
 import type {
   DomainFaqItem,
   DomainFeatureStatus,
@@ -209,6 +210,11 @@ export async function saveDomainServiceAction(
   const affiliateUrl = formString(formData, "affiliate_url") || null;
   const officialUrl = formString(formData, "official_url") || null;
 
+  const clearLogo = formBoolean(formData, "clear_logo");
+  const logoPatch = logoUrlUpdateFragment(formString(formData, "logo_url"), {
+    clearLogo,
+  });
+
   const { error: serviceError } = await supabase
     .from("services")
     .update({
@@ -219,7 +225,7 @@ export async function saveDomainServiceAction(
       primary_link_url: affiliateUrl,
       affiliate_url: affiliateUrl,
       affiliate_network: formString(formData, "affiliate_network") || null,
-      logo_url: formString(formData, "logo_url") || null,
+      ...logoPatch,
       catchphrase: formString(formData, "catchphrase") || null,
       about_text: formString(formData, "about_text") || null,
       recommended_uses: formString(formData, "recommended_uses") || null,

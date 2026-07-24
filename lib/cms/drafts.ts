@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { preserveDraftLogoUrl } from "@/lib/admin/logo-url";
 import type {
   Database,
   Json,
@@ -257,6 +258,11 @@ export async function saveServiceDraft(
         : null;
   const normalizedPayload: ServiceDraftPayload = {
     ...payload,
+    service: preserveDraftLogoUrl(
+      payload.service,
+      current.payload.service,
+      current.published_snapshot?.service,
+    ),
     plans: normalizeDraftPlanSlugs(payload.plans, serviceSlug),
   };
 

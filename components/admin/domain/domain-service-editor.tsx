@@ -176,7 +176,18 @@ export function DomainServiceEditor({ service, details }: Props) {
             label="ロゴURL"
             name="logo_url"
             defaultValue={service.logo_url ?? ""}
+            hint="空のまま保存しても既存のロゴは保持されます。"
           />
+          {service.logo_url ? (
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                name="clear_logo"
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              ロゴを削除する（チェック時のみ既存ロゴを消去）
+            </label>
+          ) : null}
           <TextField
             label="キャッチコピー"
             name="catchphrase"

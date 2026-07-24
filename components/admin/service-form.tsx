@@ -463,6 +463,16 @@ export function ServiceForm({
 
         <section className={tab === "images" ? "space-y-4" : "hidden"}>
           <Field label="ロゴURL" name="logo_url" defaultValue={service?.logo_url ?? ""} />
+          {service?.logo_url ? (
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                name="clear_logo"
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              ロゴを削除する（チェック時のみ既存ロゴを消去）
+            </label>
+          ) : null}
           <Field
             label="サムネイルURL"
             name="thumbnail_url"
@@ -470,6 +480,7 @@ export function ServiceForm({
           />
           <p className="text-xs text-slate-500">
             Phase 1 ではURL入力のみ対応。ファイルアップロードは後日対応予定です。
+            ロゴURLを空のまま保存しても、既存のロゴは保持されます。
           </p>
         </section>
 
