@@ -43,7 +43,7 @@ export function DomainTopPage({ data, managedRankings = {} }: Props) {
     serviceCount: allCount,
   });
 
-  const beginnerLinks = DOMAIN_BEGINNER_LINKS.filter((l) => l.href);
+  const beginnerLinks = DOMAIN_BEGINNER_LINKS;
 
   return (
     <div className="bg-white">
@@ -183,37 +183,21 @@ export function DomainTopPage({ data, managedRankings = {} }: Props) {
       >
         <SectionHeader
           title="ドメイン選びが初めての方へ"
-          description="基礎知識をこれから記事で順次公開予定です。"
+          description="ドメインの基礎知識を、初心者向けに分かりやすくまとめています。"
           className="!mb-0"
         />
-        {beginnerLinks.length > 0 ? (
-          <ul className="mt-3 grid gap-2 sm:mt-3.5 sm:grid-cols-2">
-            {beginnerLinks.map((link) => (
-              <li key={link.articleSlug}>
-                <Link
-                  href={link.href!}
-                  className="flex min-h-11 items-center rounded-[var(--radius-card)] border border-[var(--border)] bg-white px-3.5 text-[13px] font-medium text-[var(--navy)] transition hover:border-[var(--navy)]/30 hover:bg-[var(--surface)]"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <ul className="mt-3 grid gap-2 sm:mt-3.5 sm:grid-cols-2">
-            {DOMAIN_BEGINNER_LINKS.map((link) => (
-              <li key={link.articleSlug}>
-                <span
-                  className="flex min-h-11 items-center rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-3.5 text-[13px] text-[var(--text-muted)]"
-                  data-article-slug={link.articleSlug}
-                >
-                  {link.label}
-                  <span className="ml-auto text-[11px]">準備中</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="mt-3 grid gap-2 sm:mt-3.5 sm:grid-cols-2">
+          {beginnerLinks.map((link) => (
+            <li key={link.articleSlug}>
+              <Link
+                href={link.href}
+                className="flex min-h-11 items-center rounded-[var(--radius-card)] border border-[var(--border)] bg-white px-3.5 text-[13px] font-medium text-[var(--navy)] transition hover:border-[var(--navy)]/30 hover:bg-[var(--surface)]"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </SectionShell>
 
       <SectionShell

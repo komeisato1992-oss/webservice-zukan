@@ -12,6 +12,8 @@ export type DomainLogoVariant = "default" | "compare" | "ranking";
 type Props = {
   name: string;
   slug: string;
+  /** DB の logo_url。あれば静的マップより優先 */
+  logoUrl?: string | null;
   variant?: DomainLogoVariant;
   className?: string;
 };
@@ -23,10 +25,12 @@ type Props = {
 export function DomainServiceLogo({
   name,
   slug,
+  logoUrl = null,
   variant = "default",
   className,
 }: Props) {
-  const src = resolveDomainLogoUrl(slug);
+  const trimmedLogoUrl = logoUrl?.trim() || null;
+  const src = trimmedLogoUrl || resolveDomainLogoUrl(slug);
   const [failed, setFailed] = useState(!src);
   const softBg = domainLogoNeedsSoftBackground(slug);
   const showFallback = failed || !src;

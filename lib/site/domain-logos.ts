@@ -12,6 +12,7 @@ const DOMAIN_LOGO_BY_SLUG: Record<string, string> = {
   "star-domain": "/logos/domains/star-domain.svg",
   "value-domain": "/logos/domains/value-domain.svg",
   "cloudflare-registrar": "/logos/domains/cloudflare-registrar.svg",
+  gonbei: "/images/domain-services/gonbei-logo.png",
 };
 
 /** 白背景に同化しやすいロゴ（枠のみ薄い地色にする） */

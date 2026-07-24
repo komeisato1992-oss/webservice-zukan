@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import { hasSupabasePublicEnv } from "@/lib/env";
+import { listDomainBeginnerArticleSlugs } from "@/lib/domain-articles/registry";
 import { listGuides } from "@/lib/guides/registry";
 import { PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
+import { DOMAIN_CATEGORY_SLUG } from "@/lib/site/domain-brand";
 import { PAGE_META, getSiteUrl } from "@/lib/site/seo";
 import { createPublicClient } from "@/lib/supabase/public";
 import {
@@ -32,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(guide.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...listDomainBeginnerArticleSlugs().map((slug) => ({
+      url: `${siteUrl}/${DOMAIN_CATEGORY_SLUG}/articles/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
   ];
 

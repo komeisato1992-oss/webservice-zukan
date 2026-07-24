@@ -63,6 +63,7 @@ export function DomainRankingCard({
         <DomainServiceLogo
           name={card.service.name}
           slug={card.service.slug}
+          logoUrl={card.service.logo_url}
           variant="ranking"
           className="mx-auto"
         />

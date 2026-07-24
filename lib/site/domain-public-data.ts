@@ -235,7 +235,7 @@ async function fetchDomainTopData(
 
 const getCachedDomainTopData = unstable_cache(
   fetchDomainTopData,
-  ["domain-top-data-v4-compare"],
+  ["domain-top-data-v6-catchphrase"],
   {
     revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
     tags: [PUBLIC_SITE_CACHE_TAG],

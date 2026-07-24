@@ -91,6 +91,7 @@ export function ServiceCard({
             <DomainServiceLogo
               name={service.name}
               slug={service.slug}
+              logoUrl={service.logo_url}
               variant="default"
             />
           </Link>

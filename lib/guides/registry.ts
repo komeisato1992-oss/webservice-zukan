@@ -3,6 +3,7 @@ import { BusinessRentalServerArticle } from "@/components/site/guides/business-r
 import { FastRentalServerArticle } from "@/components/site/guides/fast-rental-server-article";
 import { CheapRentalServerArticle } from "@/components/site/guides/cheap-rental-server-article";
 import { RentalServerRecommendationArticle } from "@/components/site/guides/rental-server-recommendation-article";
+import { RentalServerStorageArticle } from "@/components/site/guides/rental-server-storage-article";
 import { WordpressRentalServerArticle } from "@/components/site/guides/wordpress-rental-server-article";
 import { WordpressVsServerArticle } from "@/components/site/guides/wordpress-vs-server-article";
 import { PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
@@ -293,6 +294,55 @@ const FAST_RENTAL_SERVER: GuideArticleMeta = {
 };
 
 
+const RENTAL_SERVER_STORAGE: GuideArticleMeta = {
+  slug: "rental-server-storage",
+  title:
+    "レンタルサーバーの容量はどれくらい必要？用途別の目安を初心者向けに解説",
+  description:
+    "レンタルサーバーの容量は何GBあれば十分？ブログ・コーポレート・ECなど用途別の目安と、容量だけで選ばないポイント、節約方法を初心者向けに解説します。",
+  categories: ["初心者", "比較"],
+  publishedAt: "2026-07-24",
+  updatedAt: "2026-07-24",
+  toc: [
+    { id: "intro", label: "レンタルサーバーの容量は何GBあれば十分？" },
+    { id: "what-is-storage", label: "容量とは？" },
+    { id: "by-purpose", label: "用途別の容量の目安" },
+    { id: "not-only-storage", label: "容量だけで選んでも大丈夫？" },
+    { id: "when-full", label: "容量が足りなくなったら？" },
+    { id: "save-storage", label: "容量を節約する方法" },
+    { id: "compare", label: "サーバー図鑑で容量を比較する" },
+    { id: "faq", label: "よくある質問" },
+    { id: "summary", label: "まとめ" },
+  ],
+  related: [
+    {
+      href: "/guides/rental-server-recommendation",
+      label: "レンタルサーバーおすすめ10選",
+    },
+    {
+      href: "/guides/cheap-rental-server",
+      label: "月額料金が安いレンタルサーバーおすすめ",
+    },
+    {
+      href: "/guides/wordpress-rental-server",
+      label: "WordPressにおすすめのレンタルサーバー3選",
+    },
+    {
+      href: "/guides/wordpress-vs-rental-server",
+      label: "レンタルサーバーとWordPressの違い",
+    },
+    {
+      href: categoryPath(PRIMARY_CATEGORY_SLUG, "compare"),
+      label: "レンタルサーバー比較",
+    },
+    {
+      href: `/${PRIMARY_CATEGORY_SLUG}`,
+      label: "サーバー図鑑トップ",
+    },
+  ],
+  Content: RentalServerStorageArticle,
+};
+
 const WORDPRESS_VS_SERVER: GuideArticleMeta = {
   slug: "wordpress-vs-rental-server",
   title: "レンタルサーバーとWordPressの違いとは？初心者向けにわかりやすく解説",
@@ -341,6 +391,7 @@ const WORDPRESS_VS_SERVER: GuideArticleMeta = {
 };
 
 const GUIDES: GuideArticleMeta[] = [
+  RENTAL_SERVER_STORAGE,
   WORDPRESS_VS_SERVER,
   FAST_RENTAL_SERVER,
   BUSINESS_RENTAL_SERVER,

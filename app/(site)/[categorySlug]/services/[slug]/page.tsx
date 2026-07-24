@@ -357,6 +357,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <DomainServiceLogo
                     name={service.name}
                     slug={service.slug}
+                    logoUrl={service.logo_url}
                     variant="default"
                   />
                 </div>

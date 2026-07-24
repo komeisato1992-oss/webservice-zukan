@@ -1,6 +1,6 @@
 /**
- * ドメイン図鑑の初期掲載サービス（8件）カタログ。
- * 重複登録しない冪等シードの元データ。
+ * ドメイン図鑑の初期掲載サービスカタログ。
+ * 重複登録しない冪等シードの元データ（公開一覧は DB の公開サービスを動的取得）。
  */
 
 export type DomainShellService = {
@@ -58,5 +58,11 @@ export const DOMAIN_SHELL_SERVICES: readonly DomainShellService[] = [
     slug: "cloudflare-registrar",
     officialUrl: "https://www.cloudflare.com/ja-jp/products/registrar/",
     displayOrder: 8,
+  },
+  {
+    name: "ゴンベエドメイン",
+    slug: "gonbei",
+    officialUrl: "https://www.gonbei.jp/",
+    displayOrder: 9,
   },
 ];

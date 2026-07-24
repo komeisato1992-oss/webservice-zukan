@@ -5,16 +5,16 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import {
   DOMAIN_COMPARISON_GROUP_LABELS,
-  DOMAIN_COMPARISON_GROUP_ORDER,
+  DOMAIN_TOP_COMPARE_GROUP_ORDER,
+  findCheapestServiceIds,
   formatDomainPrice,
   formatDomainStatus,
   getDomainDetailValue,
+  isAffordableDomainPrice,
   pickDomainCompareServices,
-  rankComparablePrices,
-  visibleItemsForGroup,
+  visibleDomainTopSupportItems,
   visiblePriceTldGroups,
   type DomainCompareItemView,
-  type DomainPriceRank,
   type DomainPriceTldGroup,
 } from "@/lib/site/domain-compare";
 import type { DomainServiceDetails } from "@/lib/types/database";
@@ -51,7 +51,6 @@ export function DomainTopCompareTable({
 }: Props) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     price: true,
-    feature: true,
     support: true,
   });
   const [hoverCol, setHoverCol] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export function DomainTopCompareTable({
     >
       <SectionHeader
         title="ドメインサービスを比較"
-        description="公開中のドメインサービスを、取得・更新・移管料金や機能、サポートでまとめて比較できます。"
+        description="公開中のドメインサービスを、取得・更新・移管料金とサポートでまとめて比較できます。"
         emphasis
         className="!mb-0 max-w-3xl [&_h2]:text-[1.5rem] sm:[&_h2]:text-[1.75rem] lg:[&_h2]:text-[1.875rem]"
       />
@@ -121,6 +120,7 @@ export function DomainTopCompareTable({
                           <DomainServiceLogo
                             name={col.service.name}
                             slug={col.service.slug}
+                            logoUrl={col.service.logo_url}
                             variant="compare"
                           />
                           <p className="w-full text-center text-[12px] font-bold leading-snug text-white sm:text-[13px]">
@@ -135,15 +135,13 @@ export function DomainTopCompareTable({
                 </thead>
 
                 <tbody>
-                  {DOMAIN_COMPARISON_GROUP_ORDER.map((groupKey) => {
+                  {DOMAIN_TOP_COMPARE_GROUP_ORDER.map((groupKey) => {
                     const open = openGroups[groupKey] ?? false;
                     const label = DOMAIN_COMPARISON_GROUP_LABELS[groupKey];
-                    const featureRows =
-                      groupKey === "feature"
-                        ? visibleItemsForGroup(comparisonItems, "feature")
-                        : groupKey === "support"
-                          ? visibleItemsForGroup(comparisonItems, "support")
-                          : [];
+                    const supportRows =
+                      groupKey === "support"
+                        ? visibleDomainTopSupportItems(comparisonItems)
+                        : [];
                     const priceGroups =
                       groupKey === "price"
                         ? visiblePriceTldGroups(comparisonItems)
@@ -177,13 +175,13 @@ export function DomainTopCompareTable({
                               />
                             ))
                           )
-                        ) : featureRows.length === 0 ? (
+                        ) : supportRows.length === 0 ? (
                           <EmptyRow
                             colSpan={columns.length + 1}
                             message="表示中の項目がありません"
                           />
                         ) : (
-                          featureRows.map((item, idx) => (
+                          supportRows.map((item, idx) => (
                             <StatusRow
                               key={item.item_key}
                               item={item}
@@ -350,13 +348,6 @@ function readNumericDetail(
   return Number.isNaN(n) ? null : n;
 }
 
-function priceRankClass(rank: DomainPriceRank | undefined): string {
-  if (rank === 1) return "domain-price-rank-1";
-  if (rank === 2) return "domain-price-rank-2";
-  if (rank === 3) return "domain-price-rank-3";
-  return "";
-}
-
 const PRICE_LINES = [
   { kind: "registration" as const, label: "取得" },
   { kind: "renewal" as const, label: "更新" },
@@ -385,8 +376,8 @@ function PriceTldRow({
       group[line.kind]?.item_key ?? `${group.tldPrefix}_${line.kind}`,
   }));
 
-  const ranksByKind = {
-    registration: rankComparablePrices(
+  const cheapestByKind = {
+    registration: findCheapestServiceIds(
       Object.fromEntries(
         columns.map((col) => [
           col.service.id,
@@ -397,7 +388,7 @@ function PriceTldRow({
         ]),
       ),
     ),
-    renewal: rankComparablePrices(
+    renewal: findCheapestServiceIds(
       Object.fromEntries(
         columns.map((col) => [
           col.service.id,
@@ -408,7 +399,7 @@ function PriceTldRow({
         ]),
       ),
     ),
-    transfer: rankComparablePrices(
+    transfer: findCheapestServiceIds(
       Object.fromEntries(
         columns.map((col) => [
           col.service.id,
@@ -443,8 +434,8 @@ function PriceTldRow({
         </span>
       </th>
       {columns.map((col) => {
-        const hasRank1 = priceLines.some(
-          (line) => ranksByKind[line.kind][col.service.id] === 1,
+        const hasCheapest = priceLines.some((line) =>
+          cheapestByKind[line.kind].has(col.service.id),
         );
         return (
           <td
@@ -452,9 +443,9 @@ function PriceTldRow({
             className={cn(
               "px-2 py-2.5 text-left align-top transition-colors sm:py-3",
               SERVICE_W,
-              hasRank1 && "domain-compare-best-cell",
+              hasCheapest && "domain-compare-best-cell",
               hoverCol === col.service.id &&
-                !hasRank1 &&
+                !hasCheapest &&
                 "compare-cell-hover",
             )}
             onMouseEnter={() => onHoverCol(col.service.id)}
@@ -466,14 +457,17 @@ function PriceTldRow({
                   detailsByServiceId[col.service.id],
                   line.itemKey,
                 );
-                const rank = ranksByKind[line.kind][col.service.id];
+                const isCheapest = cheapestByKind[line.kind].has(
+                  col.service.id,
+                );
+                const isAffordable = isAffordableDomainPrice(value);
                 const isRenewal = line.kind === "renewal";
                 return (
                   <li
                     key={line.kind}
                     className={cn(
                       "grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-1.5 rounded-[0.375rem] px-1.5 py-1",
-                      priceRankClass(rank),
+                      isAffordable && "domain-price-affordable",
                     )}
                   >
                     <span className="shrink-0 text-[10px] font-medium leading-none text-[var(--text-muted)] sm:text-[11px]">
@@ -486,13 +480,12 @@ function PriceTldRow({
                           ? "text-[13px] font-bold sm:text-[14px]"
                           : "text-[12px] font-semibold sm:text-[13px]",
                         value == null &&
-                          !rank &&
                           "font-normal text-[var(--text-muted)]",
-                        rank != null && "font-bold",
+                        (isCheapest || isAffordable) && value != null && "font-bold",
                       )}
                     >
                       {formatDomainPrice(value)}
-                      {rank === 1 ? (
+                      {isCheapest ? (
                         <span className="domain-compare-best-badge shrink-0 text-[10px]">
                           ⭐ 最安
                         </span>

@@ -4,10 +4,16 @@ import { hasSupabasePublicEnv } from "@/lib/env";
 import { categoryPath, isReservedPathSegment } from "@/lib/links";
 import { createPublicClient } from "@/lib/supabase/public";
 import { ServiceCard } from "@/components/site/service-card";
+import { DomainServiceCard } from "@/components/site/domain-service-card";
 import { ServicesListClient } from "@/components/site/services-list-client";
 import { SITE_BRAND, PRIMARY_CATEGORY_SLUG } from "@/lib/site/brand";
+import {
+  DOMAIN_BRAND,
+  DOMAIN_CATEGORY_SLUG,
+} from "@/lib/site/domain-brand";
 import { buildPageMetadata } from "@/lib/site/seo";
 import { loadServerTopData } from "@/lib/site/public-data";
+import { loadDomainTopData } from "@/lib/site/domain-public-data";
 import { DataUnavailable } from "@/components/site/data-unavailable";
 import type { AffiliateLink, Service } from "@/lib/types/database";
 import {
@@ -50,6 +56,51 @@ export default async function CategoryServicesPage({ params }: Props) {
   }
 
   const isServer = categorySlug === PRIMARY_CATEGORY_SLUG;
+  const isDomain = categorySlug === DOMAIN_CATEGORY_SLUG;
+
+  if (isDomain) {
+    let data;
+    let failed = false;
+    try {
+      data = await loadDomainTopData(categorySlug);
+    } catch {
+      failed = true;
+    }
+    if (failed || !data) return <DataUnavailable />;
+
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <Breadcrumb
+          items={[
+            { href: categoryPath(DOMAIN_CATEGORY_SLUG), label: DOMAIN_BRAND },
+            { label: "サービス一覧" },
+          ]}
+        />
+        <h1 className="mt-3 text-[1.625rem] font-bold tracking-tight text-[var(--text-primary)] sm:text-[2rem]">
+          {DOMAIN_BRAND}のサービス一覧
+        </h1>
+        <p className="mt-2 text-[var(--text-body)]">
+          掲載サービスを一覧で確認できます。
+        </p>
+
+        {data.services.length === 0 ? (
+          <p className="mt-8 rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-5 py-10 text-center text-[var(--text-body)]">
+            公開中のサービスはまだありません。
+          </p>
+        ) : (
+          <div className="mt-6 grid gap-[var(--card-gap)] sm:grid-cols-2 sm:gap-[var(--card-gap-md)] lg:grid-cols-3">
+            {data.services.map((item) => (
+              <DomainServiceCard
+                key={item.service.id}
+                item={item}
+                categorySlug={categorySlug}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (isServer) {
     let data;

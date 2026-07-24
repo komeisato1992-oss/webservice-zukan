@@ -309,55 +309,65 @@ export function visiblePriceTldGroups(
  * 最安判定。null は除外。正式な 0 は候補に含める。
  */
 export function findCheapestServiceIds(
-  valuesByServiceId: Record<string, number | null>,
+  valuesByServiceId: Record<string, number | null | undefined>,
 ): Set<string> {
   const entries = Object.entries(valuesByServiceId).filter(
-    ([, v]) => v != null && !Number.isNaN(Number(v)),
-  ) as Array<[string, number]>;
+    (entry): entry is [string, number] => {
+      const v = entry[1];
+      return typeof v === "number" && Number.isFinite(v) && !Number.isNaN(v);
+    },
+  );
   if (entries.length === 0) return new Set();
   const min = Math.min(...entries.map(([, v]) => v));
   return new Set(entries.filter(([, v]) => v === min).map(([id]) => id));
 }
 
-export type DomainPriceRank = 1 | 2 | 3;
+/** ドメインTOP比較表: この金額以下を緑強調（0円含む） */
+export const DOMAIN_AFFORDABLE_PRICE_MAX = 1999;
 
 /**
- * 同一ドメイン・同一料金種別での料金順位（競技順位）。
- * 未入力・null・NaN は除外。明示的な 0 は有効な料金として含める。
- * 同額は同順位。1〜3位のみ返す（4位以下はキー無し）。
+ * 数値料金のみ強調対象。未登録・ハイフン相当（null）や非数値は false。
  */
-export function rankComparablePrices(
-  valuesByServiceId: Record<string, number | null | undefined>,
-): Record<string, DomainPriceRank> {
-  const eligible = Object.entries(valuesByServiceId).filter(
-    (entry): entry is [string, number] => {
-      const v = entry[1];
-      return (
-        typeof v === "number" &&
-        Number.isFinite(v) &&
-        !Number.isNaN(v)
-      );
-    },
+export function isAffordableDomainPrice(
+  value: number | null | undefined,
+): boolean {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    !Number.isNaN(value) &&
+    value <= DOMAIN_AFFORDABLE_PRICE_MAX
   );
-  if (eligible.length === 0) return {};
+}
 
-  const sorted = [...eligible].sort((a, b) => a[1] - b[1]);
-  const ranks: Record<string, DomainPriceRank> = {};
-  let i = 0;
-  while (i < sorted.length) {
-    const value = sorted[i][1];
-    const rank = i + 1;
-    let j = i + 1;
-    while (j < sorted.length && sorted[j][1] === value) j += 1;
-    if (rank <= 3) {
-      const capped = rank as DomainPriceRank;
-      for (let k = i; k < j; k += 1) {
-        ranks[sorted[k][0]] = capped;
-      }
-    }
-    i = j;
-  }
-  return ranks;
+/** ドメインTOP公開比較表に出すグループ（機能セクションは出さない） */
+export const DOMAIN_TOP_COMPARE_GROUP_ORDER = [
+  "price",
+  "support",
+] as const satisfies readonly DomainComparisonGroupKey[];
+
+/** ドメインTOPサポート行（公開表のみ。管理データに残っていてもこれ以外は出さない） */
+export const DOMAIN_TOP_SUPPORT_ITEM_KEYS = [
+  "phone_support",
+  "email_support",
+  "chat_support",
+  "server_bundle_benefit",
+] as const;
+
+const DOMAIN_TOP_SUPPORT_DISPLAY_NAME: Partial<Record<string, string>> = {
+  server_bundle_benefit: "サーバー契約特典",
+};
+
+export function visibleDomainTopSupportItems(
+  items: DomainCompareItemView[],
+): DomainCompareItemView[] {
+  const allowed = new Set<string>(DOMAIN_TOP_SUPPORT_ITEM_KEYS);
+  return visibleItemsForGroup(items, "support")
+    .filter((item) => allowed.has(item.item_key))
+    .map((item) => ({
+      ...item,
+      display_name:
+        DOMAIN_TOP_SUPPORT_DISPLAY_NAME[item.item_key] ?? item.display_name,
+    }));
 }
 
 export { DOMAIN_COMPARISON_GROUP_LABELS, DOMAIN_COMPARISON_GROUP_ORDER };

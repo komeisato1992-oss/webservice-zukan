@@ -126,24 +126,40 @@ export function ContentForm({ content, services }: Props) {
         </label>
 
         <label className="block sm:col-span-2">
-          <span className="text-sm font-medium text-slate-700">要約</span>
+          <span className="text-sm font-medium text-slate-700">要約 / description</span>
           <textarea
             name="summary"
             rows={3}
             defaultValue={content?.summary ?? ""}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            placeholder="SEO description としても使われます"
           />
         </label>
 
         <label className="block sm:col-span-2">
-          <span className="text-sm font-medium text-slate-700">本文</span>
+          <span className="text-sm font-medium text-slate-700">本文（HTML可）</span>
           <textarea
             name="body"
-            rows={10}
+            rows={14}
             defaultValue={content?.body ?? ""}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm"
+            placeholder="<h2 id=&quot;...&quot;>...</h2><p>...</p>"
           />
+          <span className="mt-1 block text-xs text-slate-500">
+            ドメイン初心者向け記事は source_type が domain_article:スラッグ のコンテンツを公開ページが読み込みます。
+          </span>
         </label>
+
+        {content?.source_type ? (
+          <label className="block sm:col-span-2">
+            <span className="text-sm font-medium text-slate-700">識別子（source_type）</span>
+            <input
+              readOnly
+              value={content.source_type}
+              className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600"
+            />
+          </label>
+        ) : null}
 
         <label className="block sm:col-span-2">
           <span className="text-sm font-medium text-slate-700">出典URL</span>

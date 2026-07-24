@@ -247,29 +247,32 @@ export const DOMAIN_COMPARE_GROUP_CARDS = [
 ] as const;
 
 /**
- * 初心者向け案内。href が null の項目は本番でリンク化しない
- *（記事公開後に slug / path を接続する）。
+ * 初心者向け案内。href は /domain/articles/{articleSlug}
  */
 export const DOMAIN_BEGINNER_LINKS: Array<{
   label: string;
   articleSlug: string;
-  href: string | null;
+  href: string;
 }> = [
-  { label: "ドメインとは？", articleSlug: "what-is-domain", href: null },
+  {
+    label: "ドメインとは？",
+    articleSlug: "what-is-domain",
+    href: "/domain/articles/what-is-domain",
+  },
   {
     label: ".comと.jpの違い",
     articleSlug: "com-vs-jp",
-    href: null,
+    href: "/domain/articles/com-vs-jp",
   },
   {
     label: "ドメイン取得の流れ",
     articleSlug: "how-to-register-domain",
-    href: null,
+    href: "/domain/articles/how-to-register-domain",
   },
   {
     label: "Whois代理公開とは？",
     articleSlug: "what-is-whois-privacy",
-    href: null,
+    href: "/domain/articles/what-is-whois-privacy",
   },
 ];
 
@@ -302,7 +305,7 @@ export const DOMAIN_FAQS: FaqItem[] = [
 ];
 
 export const DOMAIN_PAGE_SECTION_NAV = [
-  { href: "#recommended-ranking", label: "人気ランキング" },
+  { href: "#recommended-ranking", label: "ランキング" },
   { href: "#domain-compare-table", label: "比較表" },
   { href: "#all-services", label: "サービス一覧" },
   { href: "#beginner", label: "初心者向け" },
